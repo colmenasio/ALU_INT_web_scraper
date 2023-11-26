@@ -145,18 +145,18 @@ class Website:
                 curr_disaster.process_data()  # TODO Does nothing rn, just prints a thingie. Add code in each subclass
                 curr_disaster.save_to_database()  # TODO Rn it just prints the raw data. Add code in each subclass
                 self.link_pipeline.task_done()
-            except ConnectionError:  # I'm 99% Sure there's a better way to do this
-                curr_link_dict["status"] = "Connection_Error"
+            except Exception as e:
+                if isinstance(e, queue.Empty):
+                    return
+                elif isinstance(e, ConnectionError):
+                    curr_link_dict["status"] = "Connection_Error"
+                elif isinstance(e, TypeError) or isinstance(e, AttributeError):
+                    curr_link_dict["status"] = "Parsing_Error"
+                elif isinstance(e, UnableToDetectDisasterType):
+                    curr_link_dict["status"] = "Disaster_Type_Not_Found"
                 print(curr_link_dict)
                 failed_links_queue_arg.put(curr_link_dict)
                 self.link_pipeline.task_done()
-            except (TypeError, AttributeError):
-                curr_link_dict["status"] = "Parsing_Error"
-                print(curr_link_dict)
-                failed_links_queue_arg.put(curr_link_dict)
-                self.link_pipeline.task_done()
-            except queue.Empty:
-                return
 
     def generic_new_scraping(self, link_to_new_arg: str) -> Disaster:  # return a Disaster instance
         """Generic method to scrape text out of a page consisting of a title and main body"""
@@ -175,13 +175,15 @@ class Website:
         raise NotImplementedError
 
     @staticmethod
-    def hugg_face_classifier(self, new_arg: dict) -> Disaster:
+    def hugg_face_classifier(new_arg: dict) -> Disaster:
         """Uses Hugging face to determine which class of disaster is the new about and extract corresponding info"""
         # PSEUDOCODE (kinda???)
         # classifier = transformers.pipeline("zero-shot-classification") or something like this
         # TODO maybe move the classifier to the class attributes to just have one classifier i guess
         # disaster_type = classifier(new_arg['title'], candidate_labels=Disaster.sub_classes.keys())
-        # disaster_subclass = disaster_type["labels"][0] if disaster_type["scores"][0] > 0.5 else "NoneDisaster"
+        #if disaster_type["scores"][0] < 0.4:
+        #    raise UnableToDetectDisasterType
+        # disaster_subclass = disaster_type["labels"][0]
         # disaster_inst = Disaster.sub_classes[disaster_subclass](new_arg)
         return NoneDisaster(new_arg)
 
