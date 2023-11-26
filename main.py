@@ -5,6 +5,9 @@ source_links_todo = [
     "https://gdacs.org/Alerts/default.aspx"
 ]
 
+general_whitelists = [".+quake.+", ".+.flood+", ".+volcan.+", ".+hurricane.+", ".+drought.+", ".+fire.+", ".+tsunami.+",
+                     ".+disease.+", ".+pande.+", ".+water.+", ".+rain.+", ".+outbreak.+"]
+
 flood_list = Website(web_name_arg="Flood List",
                      main_page_link_arg="https://floodlist.com/news",
                      news_tag_type_arg="main",
@@ -30,7 +33,7 @@ relief_web = Website(web_name_arg="Relief Web",
                      title_tag_attr_arg={"class": "rw-article__title rw-page-title"},
                      body_tag_type_arg="div",
                      body_tag_attr_arg={"class": "rw-article__content"},
-                     news_links_blacklist_arg=["/country/.+", "/organization/.+"],
+                     news_links_whitelist_arg=general_whitelists,
                      base_next_page_link_arg="https://reliefweb.int/updates",
                      encoding_arg="UTF-8"
                      )
@@ -62,15 +65,14 @@ reuters = Website(web_name_arg="Reuters",
                   title_tag_attr_arg={"data-testid": "Heading"},
                   body_tag_type_arg="div",
                   body_tag_attr_arg={"class": "article-body__content__17Yit"},
-                  news_links_whitelist_arg=[".+quake.+", ".+.flood+", ".+volcan.+", ".+hurricane.+",
-                                            ".+drought.+", ".+fire.+", ".+tsunami.+"],
+                  news_links_whitelist_arg=general_whitelists,
                   base_news_link_arg="https://www.reuters.com",
                   base_next_page_link_arg="https://www.reuters.com/news/archive/tsunami",
                   news_needs_selenium_arg=True,
                   encoding_arg="UTF-8"
                   )
 
-crawler = WebCrawler()
-reuters.get_links(max_links=10)
+
+flood_list.get_links(max_links=10)
 print("DISPATCHING LINKS")
-reuters.dispatch_links(n_of_threads=5)
+flood_list.dispatch_links(n_of_threads=5)

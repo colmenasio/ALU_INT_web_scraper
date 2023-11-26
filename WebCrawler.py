@@ -142,7 +142,8 @@ class Website:
                     failed_links_queue_arg.put(curr_link_dict)
                     continue
                 curr_disaster = apply_method_arg(self, curr_link_dict["link"])
-                curr_disaster.save_to_database()  # Rn it just prints it. Change the definition in Disaster_Subclasses
+                curr_disaster.process_data()  # TODO Does nothing rn, just prints a thingie. Add code in each subclass
+                curr_disaster.save_to_database()  # TODO Rn it just prints the raw data. Add code in each subclass
                 self.link_pipeline.task_done()
             except ConnectionError:  # I'm 99% Sure there's a better way to do this
                 curr_link_dict["status"] = "Connection_Error"
@@ -162,14 +163,27 @@ class Website:
         soup = self.get_soup_from_link(link_to_new_arg, use_selenium_arg=self.news_needs_sel)
 
         title = soup.find(self.title_tag_type, attrs=self.title_tag_attr)
-        parsed_title = re.sub(r'\s+', ' ', title.text)
         body = soup.find(self.body_tag_type, attrs=self.body_tag_attr).find_all("p")
+        parsed_title = re.sub(r'\s+', ' ', title.text)
+        parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
 
-        # disaster_parse = some method to NLP the info({"link": link_to_new_arg, "title": title, "body": body})
-        return NoneDisaster({"link": link_to_new_arg, "title": parsed_title, "body": "".join([x.text for x in body])})
+        disaster_inst = self.hugg_face_classifier({"link": link_to_new_arg, "title": parsed_title, "body": parsed_body})
+        return disaster_inst
 
     def gdacs_new_scraping(self, link_to_new_arg: str) -> Disaster:
+        """call the api i guess"""
         raise NotImplementedError
+
+    @staticmethod
+    def hugg_face_classifier(self, new_arg: dict) -> Disaster:
+        """Uses Hugging face to determine which class of disaster is the new about and extract corresponding info"""
+        # PSEUDOCODE (kinda???)
+        # classifier = transformers.pipeline("zero-shot-classification") or something like this
+        # TODO maybe move the classifier to the class attributes to just have one classifier i guess
+        # disaster_type = classifier(new_arg['title'], candidate_labels=Disaster.sub_classes.keys())
+        # disaster_subclass = disaster_type["labels"][0] if disaster_type["scores"][0] > 0.5 else "NoneDisaster"
+        # disaster_inst = Disaster.sub_classes[disaster_subclass](new_arg)
+        return NoneDisaster(new_arg)
 
 
 class WebCrawler:
