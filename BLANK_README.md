@@ -27,6 +27,37 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+## Main Features
+1. Website class:
+    - To get started, create an instance of the Website class, specifying the location of relevant link, whitelists, and other parameters:
+      ```py
+      # Example
+      generic_web = Website(web_name_arg="Just a Website",
+                     main_page_link_arg="https://thingies.com/news",
+                     news_tag_type_arg="main",
+                     news_tag_attr_arg={"class": "site-main"},
+                     new_link_tag_type_arg="h2",
+                     new_link_tag_attr_arg={"class": "entry-title"},
+                     next_page_tag_attr_arg={"class": "next page-numbers"},
+                     title_tag_type_arg="h1",
+                     title_tag_attr_arg={"itemprop": "headline"},
+                     body_tag_type_arg="div",
+                     body_tag_attr_arg={"itemprop": "articleBody"},
+                     news_links_blacklist_arg=["https://website/not_related_stuff/.+"],
+                     encoding_arg="UTF-8"
+                     )
+      ```
+    - Each Website intance has an url pipeline of links to be scraped. The method  `get_links` fill the pipeline with links from the main page specified
+      ```py
+      # Example
+      flood_list.get_links(max_links=10)
+      ```
+    - Once the pipeline is full, `dispatch_links` scrapes, parses, and (in the future) uses NLP to extract data and send it to a database
+      ```py
+      # Example
+      flood_list.dispatch_links(n_of_threads=5)
+      ```
+
 
 <!-- ROADMAP -->
 ## Roadmap
