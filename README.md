@@ -16,8 +16,12 @@
 *** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
 *** See the bottom of this document for the declaration of the reference variables
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
+# Disaster Web Scraper (alumno interno)
+Python web scraper script for extracting disaster information from news portals
+
+THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION;
 
 <!-- Doctumentation  -->
 ## Full Documentation
