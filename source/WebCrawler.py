@@ -90,8 +90,7 @@ class Website:
 
     def get_links(self, overwrite_link_arg=None, max_links=100) -> None:
         """Crawls through the main page and get links of relevant instances"""
-        # ideas: recursively go through pages until reaching the last viewed new notes: set a maximum of links: n.
-        # ¿¿¿Perhaps generator function but then recursion is a no-no???
+        # ideas: just rework the recursive part of the function to take advantage of mutability.
         # TODO: this code may cause the same link to be analyzed twice if the script is run twice in a short time or if
         #  max_links is too high. Implement a "last link" check so that if the collection of links reaches
         #  the first link of the last search, it stops
@@ -111,7 +110,7 @@ class Website:
             if next_page_link is None:
                 warnings.warn(f"get_links has stopped prematurely for {self.web_name}")
                 return
-            print(f"Length of the page in links: {len(hrefs)}\n next page link: {next_page_link}")
+            # print(f"Length of the page in links: {len(hrefs)}\n next page link: {next_page_link}")
             self.get_links(overwrite_link_arg=next_page_link, max_links=max_links - len(hrefs))
 
     def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads: int = 10,
@@ -148,7 +147,7 @@ class Website:
                     failed_links_queue_arg.put(curr_link_dict)
                     continue
                 curr_disaster = apply_method_arg(self, curr_link_dict["link"])
-                curr_disaster.process_data()  # TODO Does nothing rn, just prints a thingie. Add code in each subclass
+                curr_disaster.extract_json()  # TODO Does nothing rn, just prints a thingie. Add code in each subclass
                 curr_disaster.save_to_database()  # TODO Rn it just prints the raw data. Add code in each subclass
                 self.link_pipeline.task_done()
             except Exception as e:
