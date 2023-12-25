@@ -5,8 +5,8 @@ source_links_todo = [
     "https://gdacs.org/Alerts/default.aspx"
 ]
 
-general_whitelists = [".+quake.+", ".+.flood+", ".+volcan.+", ".+hurricane.+", ".+drought.+", ".+fire.+", ".+tsunami.+",
-                     ".+disease.+", ".+pande.+", ".+water.+", ".+rain.+", ".+outbreak.+"]
+general_whitelists = [".+quake.+", ".+flood.+", ".+volcan.+", ".+hurricane.+", ".+drought.+", ".+fire.+", ".+tsunami.+",
+                     ".+disease.+", ".+pandem.+", ".+water.+", ".+ rain.+", ".+outbreak.+"]
 
 flood_list = Website(web_name_arg="Flood List",
                      main_page_link_arg="https://floodlist.com/news",
@@ -73,6 +73,6 @@ reuters = Website(web_name_arg="Reuters",
                   )
 
 
-flood_list.get_links(max_links=10)
+relief_web.get_links(max_links=10)
 print("DISPATCHING LINKS")
-flood_list.dispatch_links(n_of_threads=5)
+relief_web.dispatch_links(n_of_threads=2)

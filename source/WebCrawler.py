@@ -191,7 +191,7 @@ class Website:
         #    raise UnableToDetectDisasterType
         # disaster_subclass = disaster_type["labels"][0]
         # disaster_inst = Disaster.sub_classes[disaster_subclass](new_arg)
-        return NoneDisaster(new_arg)
+        return Disaster(new_arg)
 
 
 class WebCrawler:
