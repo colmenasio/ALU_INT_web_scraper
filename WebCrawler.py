@@ -119,11 +119,12 @@ class Website:
         """Visits links in the pipeline. Initialize the consumer threads that will eventually send them links
         to the method indicated, to be processed, and later to the database.
         Some webs like gdacs has such a well-defined structure that should be treated as an extra case,
-        in which no NLP is needed"""
+        in which no NLP is needed
+        -> extracting_method_arg is a Website method returning a Disaster instance"""
         # ideas: get format of the web in question as argument ig?. Threading!!!
         # notes:
-        methods = {"generic": lambda x, link: x.generic_new_scraping(link),
-                   "gdacs": lambda x, link: x.gdacs_new_scraping(link)}
+        methods = {"generic": lambda x, link: Website.generic_new_scraping(x, link),
+                   "gdacs": lambda x, link: Website.gdacs_new_scraping(x, link)}
         parse_method = methods[extracting_method_arg]  # funny monkey patching go brrr brrr
         failed_links = Queue()
         threads = [threading.Thread(target=lambda: self.thread_function(parse_method, failed_links, status_filter_arg))
@@ -133,7 +134,12 @@ class Website:
         self.link_pipeline = failed_links
         Website.sel_driver.close()
 
-    def thread_function(self, apply_method_arg, failed_links_queue_arg: Queue, filter_arg) -> None:
+    def thread_function(self, apply_method_arg, failed_links_queue_arg: Queue, filter_arg: str) -> None:
+        """Consumer thread main function. Will continuously consume elements from the pipeline.
+        -> apply_method_arg is a website method that returns a Disaster instance
+        -> failed_links_queue_arg is a queue object where links will be added in case of exception
+        -> filter_arg is a string filtering links to analyze by status. None will match all. Rejected links will be
+            sent to failed_links_queue_arg"""
         curr_link_dict = None
         while True:
             try:
@@ -159,7 +165,7 @@ class Website:
                 self.link_pipeline.task_done()
 
     def generic_new_scraping(self, link_to_new_arg: str) -> Disaster:  # return a Disaster instance
-        """Generic method to scrape text out of a page consisting of a title and main body"""
+        """Generic method to scrape text out of a new consisting of a title and main body"""
         soup = self.get_soup_from_link(link_to_new_arg, use_selenium_arg=self.news_needs_sel)
 
         title = soup.find(self.title_tag_type, attrs=self.title_tag_attr)
@@ -167,7 +173,7 @@ class Website:
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
 
-        disaster_inst = self.hugg_face_classifier({"link": link_to_new_arg, "title": parsed_title, "body": parsed_body})
+        disaster_inst = self.gpt_classifier({"link": link_to_new_arg, "title": parsed_title, "body": parsed_body})
         return disaster_inst
 
     def gdacs_new_scraping(self, link_to_new_arg: str) -> Disaster:
@@ -175,8 +181,8 @@ class Website:
         raise NotImplementedError
 
     @staticmethod
-    def hugg_face_classifier(new_arg: dict) -> Disaster:
-        """Uses Hugging face to determine which class of disaster is the new about and extract corresponding info"""
+    def gpt_classifier(new_arg: dict) -> Disaster:
+        """Uses GPT to determine which class of disaster is the new about and extract corresponding info"""
         # PSEUDOCODE (kinda???)
         # classifier = transformers.pipeline("zero-shot-classification") or something like this
         # TODO maybe move the classifier to the class attributes to just have one classifier i guess
