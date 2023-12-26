@@ -73,6 +73,6 @@ reuters = Website(web_name_arg="Reuters",
                   )
 
 
-relief_web.get_links(max_links=10)
+flood_list.get_links(max_links=10)
 print("DISPATCHING LINKS")
-relief_web.dispatch_links(n_of_threads=2)
+flood_list.dispatch_links(n_of_threads=2)

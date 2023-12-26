@@ -147,8 +147,9 @@ class Website:
                     failed_links_queue_arg.put(curr_link_dict)
                     continue
                 curr_disaster = apply_method_arg(self, curr_link_dict["link"])
-                curr_disaster.extract_json()  # TODO Does nothing rn, just prints a thingie. Add code in each subclass
-                curr_disaster.save_to_database()  # TODO Rn it just prints the raw data. Add code in each subclass
+                curr_disaster.classify_new()
+                curr_disaster.extract_json()
+                curr_disaster.save_to_database()  # TODO Rn it just prints the data. Add code in each subclass
                 self.link_pipeline.task_done()
             except Exception as e:
                 if isinstance(e, queue.Empty):
