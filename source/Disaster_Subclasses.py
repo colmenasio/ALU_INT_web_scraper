@@ -11,13 +11,13 @@ class Disaster:
     with open("gpt_keys.txt") as stream:
         openai_keys = list(map(lambda x: x.rstrip("\n", ), stream.readlines()))
     subtypes = ("Flood", "Drought", "Disease", "Earthquake")
-    generic_parameter = ("Number of lethal victims (int)", "Number of affected people (int)",
-                         "Date of the disaster (date)", "Region (str)")
+    generic_parameters = ("Number of lethal victims (int)", "Number of affected people (int)",
+                          "Date of the disaster (date)", "Region (str)")
     subtypes_parameters = {
-        "Flood": generic_parameter,
-        "Drought": generic_parameter,
+        "Flood": generic_parameters,
+        "Drought": generic_parameters,
         "Disease": ("Number of lethal victims (int)", "Region (str)", "Name of the disease (str)"),
-        "Earthquake": generic_parameter
+        "Earthquake": generic_parameters
     }
 
     parser_chat = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
@@ -29,8 +29,8 @@ class Disaster:
         self.disaster_data = None
         print(f"PASSED DATA: {unprocessed_data_arg}")
 
-    def classify_new(self) -> None:
-        """Classifies a new into one of the disaster subtypes. This functions is so bad it's a pain to look at,
+    def classify(self) -> None:
+        """Classifies a new into one of the disaster subtypes. This function is so bad it's painful to look at,
          ill rewrite it later"""
         classifier_client = openai.OpenAI(api_key=Disaster.openai_keys[0], organization=Disaster.openai_keys[1])
         response = classifier_client.chat.completions.create(
@@ -50,24 +50,41 @@ class Disaster:
         self.disaster_type = disaster_type
 
     def extract_json(self) -> None:
-        """Parses a new obtaining the parameters specified in its disaster subtype. This functions is so bad it's a pain
+        """Parses a new obtaining the parameters specified in its disaster subtype. This function is so bad it's painful
         to look at, ill rewrite it later"""
         parser_client = openai.OpenAI(api_key=Disaster.openai_keys[0], organization=Disaster.openai_keys[1])
         response = parser_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system",
-                       "content": "You are a scraping tool. The following messages will containt text from news parsed "
+                       "content": "You are a scraping tool. The following message will contain text from a new, parsed "
                                   "as a python dictionary, as well as a list of parameters. Parse the new, obtaining "
                                   "the data corresponding to each parameter, and return the answers in json format."
                                   "Each parameter is followed by the type it must be answered with in parenthesis;\n"
-                                  "- int indicates unsigned integer\n"
+                                  "- int indicates unsigned integer. If an exact number cannot be extracted, provide a "
+                                  "lower bound. For example, 'dozens' -> '12', 'hundreds' -> '100'\n"
                                   "- str indicates string\n"
                                   "- date indicates a string containing the date in the format: "
                                   "'from yyyy/mm/dd to yyyy/mm/dd'. If a specific date is unknown, replace its digits "
                                   "with '-'. For example, 'from 2020/01/-- to 2020/03/01' would represent a span of "
                                   "time starting some day in January of 2020 and ending in March first 2020.\n"
+                                  "Note that these `type tags` are not to be included in the json output\n"
                                   "In case the article does not contain the information required to answer a "
-                                  "particular parameter, its value should be 'None'"},
+                                  "particular parameter, its value should be 'null'\n"
+                                  "Example:\n "
+                                  "New: "
+                                  "{'link': 'generic_new.com', "
+                                  "'title': 'Dozens of people die in a forest fire', "
+                                  "'body': 'In the first of may of this year, a fire in a forest in Norway"
+                                  "caused the death of dozens of persons and the displacement of 100 persons.'}\n"
+                                  "Parameters: ('Date (date)', 'Region (str)', "
+                                  "'Number of lethal victims (int)', 'Author of the new (str)')\n\n"
+                                  "In this case, the expected output would be:" +
+                                  '{\n"Number of lethal victims": 12,\n'
+                                  '"Date of the disaster": "from 2023/05/01 to ----/--/--",\n'
+                                  '"Region": "Norway"\n'
+                                  '"Author of the new": none\n'
+                                  '}'
+                       },
                       {"role": "user",
                        "content": f"New: {self.raw_data}\n"
                                   f"Parameters: {Disaster.subtypes_parameters[self.disaster_type]}"}
