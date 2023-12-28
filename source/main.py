@@ -1,7 +1,6 @@
 from WebCrawler import *
 
-print("jijijijiji")
-source_links_todo = [
+source_links_to_implement = [
     "https://gdacs.org/Alerts/default.aspx"
 ]
 
@@ -72,7 +71,7 @@ reuters = Website(web_name_arg="Reuters",
                   encoding_arg="UTF-8"
                   )
 
-
-flood_list.get_links(max_links=10)
+print("Running")
+flood_list.get_links(max_links=100)
 print("DISPATCHING LINKS")
-flood_list.dispatch_links(n_of_threads=2)
+flood_list.dispatch_links(n_of_threads=2, extracting_method_arg="just print")
