@@ -67,9 +67,6 @@ class Website:
 
     def parse_link(self, scraped_tag_arg, parse_next_page_link_arg: bool = 0, debug_bool=False) -> str:
         """Adds the base address to the relative address."""
-        # TODO: Deal with nones i guess
-        if debug_bool:
-            print(scraped_tag_arg["href"])
         base_link = self.next_page_base_link if parse_next_page_link_arg is True else self.news_base_link
         return base_link + scraped_tag_arg["href"]
 
@@ -88,54 +85,58 @@ class Website:
                 raw_html = stream.content.decode(self.encoding, errors="replace")
         return BeautifulSoup(raw_html, "html.parser")
 
+    def get_hrefs_from_soup(self, soup_arg: BeautifulSoup) -> list[str]:
+        main_section = soup_arg.find(name=self.news_tag_type, attrs=self.news_tag_attr)
+        relevant_a_tags = map(lambda x: x.find(name="a"),
+                              main_section.find_all(name=self.new_link_tag_type, attrs=self.new_link_tag_attr))
+        hrefs = [self.parse_link(x) for x in relevant_a_tags if self.filter_link(x["href"])]
+        return hrefs if len(hrefs) > 0 else None
+
+    def get_next_page_from_soup(self, soup_arg: BeautifulSoup) -> str:
+        next_page_tag = soup_arg.find(name="a", attrs=self.next_page_tag_attr)
+        return self.parse_link(next_page_tag, parse_next_page_link_arg=True) if next_page_tag is not None else None
+
     def get_links(self, overwrite_link_arg=None, max_links=100) -> None:
         """Crawls through the main page and get links of relevant instances"""
         # ideas: just rework the recursive part of the function to take advantage of mutability.
         # TODO: this code may cause the same link to be analyzed twice if the script is run twice in a short time or if
         #  max_links is too high. Implement a "last link" check so that if the collection of links reaches
         #  the first link of the last search, it stops
+        if max_links <= 0:
+            return
+
         link = self.main_link if overwrite_link_arg is None else overwrite_link_arg
         soup = self.get_soup_from_link(link, use_selenium_arg=self.main_needs_sel)
-
-        main_section = soup.find(name=self.news_tag_type, attrs=self.news_tag_attr)
-        relevant_a_tags = map(lambda x: x.find(name="a"), main_section.find_all(name=self.new_link_tag_type,
-                                                                                attrs=self.new_link_tag_attr))
-        hrefs = [self.parse_link(x) for x in relevant_a_tags if self.filter_link(x["href"])]
-        assert len(hrefs) != 0  # Just in case, to avoid going through every page
-
+        hrefs = self.get_hrefs_from_soup(soup)
+        if hrefs is None:
+            return
         self.add_to_links_pipeline(hrefs)
-        if len(hrefs) < max_links:
-            next_page_tag = soup.find(name="a", attrs=self.next_page_tag_attr)
-            next_page_link = self.parse_link(next_page_tag, parse_next_page_link_arg=True)
-            if next_page_link is None:
-                warnings.warn(f"get_links has stopped prematurely for {self.web_name}")
-                return
-            # print(f"Length of the page in links: {len(hrefs)}\n next page link: {next_page_link}")
-            self.get_links(overwrite_link_arg=next_page_link, max_links=max_links - len(hrefs))
+
+        next_page_link = self.get_next_page_from_soup(soup)
+        if next_page_link is None:
+            return
+
+        # print(f"Length of the page in links: {len(hrefs)}\n next page link: {next_page_link}")
+        self.get_links(overwrite_link_arg=next_page_link, max_links=max_links - len(hrefs))
 
     def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads: int = 10,
                        status_filter_arg: str = None) -> None:
-        """Visits links in the pipeline. Initialize the consumer threads that will eventually send them links
-        to the method indicated, to be processed, and later to the database.
-        Some webs like gdacs has such a well-defined structure that should be treated as an extra case,
-        in which no NLP is needed
-        -> extracting_method_arg is a Website method returning a Disaster instance"""
-        # ideas: get format of the web in question as argument ig?. Threading!!!
-        # notes:
+        """Visits links in the pipeline and initialize the consumer threads.
+        -> extracting_method_arg is a string indicating the parsing method"""
         methods = {"generic": lambda x, link: Website.generic_new_scraping(x, link),
-                   "gdacs": lambda x, link: Website.gdacs_new_scraping(x, link)}
-        parse_method = methods[extracting_method_arg]  # funny monkey patching go brrr brrr
+                   "gdacs": lambda x, link: Website.gdacs_new_scraping(x, link),
+                   "just print": lambda _, link: print(link)}
+        parse_method = methods[extracting_method_arg]
         failed_links = Queue()
         threads = [threading.Thread(target=lambda: self.thread_function(parse_method, failed_links, status_filter_arg))
                    for _ in range(n_of_threads)]
         [x.start() for x in threads]
         self.link_pipeline.join()
         self.link_pipeline = failed_links
-        Website.sel_driver.close()
 
     def thread_function(self, apply_method_arg, failed_links_queue_arg: Queue, filter_arg: str) -> None:
         """Consumer thread main function. Will continuously consume elements from the pipeline.
-        -> apply_method_arg is a website method that returns a Disaster instance
+        -> apply_method_arg is a website method that parses and sends the info the database
         -> failed_links_queue_arg is a queue object where links will be added in case of exception
         -> filter_arg is a string filtering links to analyze by status. None will match all. Rejected links will be
             sent to failed_links_queue_arg"""
@@ -146,10 +147,7 @@ class Website:
                 if filter_arg is not None and curr_link_dict["status"] != filter_arg:
                     failed_links_queue_arg.put(curr_link_dict)
                     continue
-                curr_disaster = apply_method_arg(self, curr_link_dict["link"])
-                curr_disaster.classify_new()
-                curr_disaster.extract_json()
-                curr_disaster.save_to_database()  # TODO Rn it just prints the data. Add code in each subclass
+                apply_method_arg(self, curr_link_dict["link"])
                 self.link_pipeline.task_done()
             except Exception as e:
                 if isinstance(e, queue.Empty):
@@ -164,41 +162,21 @@ class Website:
                 failed_links_queue_arg.put(curr_link_dict)
                 self.link_pipeline.task_done()
 
-    def generic_new_scraping(self, link_to_new_arg: str) -> Disaster:  # return a Disaster instance
+    def generic_new_scraping(self, link_to_new_arg: str) -> None:  # return a Disaster instance
         """Generic method to scrape text out of a new consisting of a title and main body"""
-        soup = self.get_soup_from_link(link_to_new_arg, use_selenium_arg=self.news_needs_sel)
+        curr_disaster = Disaster(self.dict_from_new_link(link_to_new_arg))
+        curr_disaster.classify()
+        curr_disaster.extract_json()
+        curr_disaster.save_to_database()  # TODO Rn it just prints the data. Add code in each subclass
 
+    def dict_from_new_link(self, link_to_new_arg: str) -> dict:
+        soup = self.get_soup_from_link(link_to_new_arg, use_selenium_arg=self.news_needs_sel)
         title = soup.find(self.title_tag_type, attrs=self.title_tag_attr)
         body = soup.find(self.body_tag_type, attrs=self.body_tag_attr).find_all("p")
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
-
-        disaster_inst = self.gpt_classifier({"link": link_to_new_arg, "title": parsed_title, "body": parsed_body})
-        return disaster_inst
+        return {"link": link_to_new_arg, "title": parsed_title, "body": parsed_body}
 
     def gdacs_new_scraping(self, link_to_new_arg: str) -> Disaster:
         """call the api i guess"""
-        raise NotImplementedError
-
-    @staticmethod
-    def gpt_classifier(new_arg: dict) -> Disaster:
-        """Uses GPT to determine which class of disaster is the new about and extract corresponding info"""
-        # PSEUDOCODE (kinda???)
-        # classifier = transformers.pipeline("zero-shot-classification") or something like this
-        # TODO maybe move the classifier to the class attributes to just have one classifier i guess
-        # disaster_type = classifier(new_arg['title'], candidate_labels=Disaster.sub_classes.keys())
-        #if disaster_type["scores"][0] < 0.4:
-        #    raise UnableToDetectDisasterType
-        # disaster_subclass = disaster_type["labels"][0]
-        # disaster_inst = Disaster.sub_classes[disaster_subclass](new_arg)
-        return Disaster(new_arg)
-
-
-class WebCrawler:
-    """Class that contains functions to crawl and collect data from webs. CLASS TO BE REMOVED"""
-
-    def crawl_website(self) -> None:
-        """Methods wrapper. given a website, apply the needed methods to crawl and scrape information."""
-        # ideas: website class is needed, used as argument in this method, contains tags information and more:
-        # notes: general flow of the function: get_links->extract_raw_text->process_new->store_in_database
         raise NotImplementedError
