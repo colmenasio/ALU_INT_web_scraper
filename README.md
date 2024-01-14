@@ -20,6 +20,7 @@
 
 # Disaster Information Web Scraper
 Python web scraper script for extracting disaster information from news portals.
+The scrip relies on `beautifulsoup` for html parsing and on `openAI` for information extraction
 This proyect was done as a "alumno interno" task
 
 THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION;
@@ -62,13 +63,10 @@ THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION
 
 - [x] Method to fetch links to news from the main page
 - [x] Parsing method to standazise said news
-- [ ] NLP analysis
+- [x] AI analysis
     - [ ] Implement API for particular webs
 - [ ] Database Integration
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- Doctumentation  -->
 ## Full Documentation
