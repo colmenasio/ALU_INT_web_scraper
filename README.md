@@ -18,17 +18,11 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-# Disaster Web Scraper (alumno interno)
-Python web scraper script for extracting disaster information from news portals
+# Disaster Information Web Scraper
+Python web scraper script for extracting disaster information from news portals.
+This proyect was done as a "alumno interno" task
 
 THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION;
-
-<!-- Doctumentation  -->
-## Full Documentation
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Main Features
@@ -76,7 +70,10 @@ See the [open issues](https://github.com/github_username/repo_name/issues) for a
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- Doctumentation  -->
+## Full Documentation
 
+_For more examples, please refer to the [Documentation](https://example.com)_
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
