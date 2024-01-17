@@ -19,7 +19,7 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 # Disaster Information Web Scraper
-Web Scraper, built in Python using [`BeautifulSoup`](https://pypi.org/project/beautifulsoup4/) for html parsing and `openAI` for information extraction.
+Web Scraper, built in Python using [`BeautifulSoup`](https://pypi.org/project/beautifulsoup4/) for html parsing and [`openAI`](https://openai.com/) for information extraction.
 Despite being originaly built for disaster news websites, can be easily used for any type of news website with a few tweaks 
 
 
