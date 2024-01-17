@@ -79,7 +79,7 @@ THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION
 <!-- Doctumentation  -->
 ## Full Documentation
 
-_For more examples, please refer to the [a relative link](Documentation())
+_For more examples, please refer to the [Documentation](Documentacion(EXTREMELY%20OUTDATED).pdf)
 NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS THEMSELF ACT AS A BETTER DOCUMENTATION
 
 <!-- ACKNOWLEDGMENTS -->
