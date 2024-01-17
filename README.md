@@ -19,12 +19,11 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 # Disaster Information Web Scraper
-Python web scraper script for extracting disaster information from news portals.
-The scrip relies on `beautifulsoup` for html parsing and on `openAI` for information extraction
-This proyect was done as a "alumno interno" task
+Web Scraper, built in Python using [`BeautifulSoup`](https://pypi.org/project/beautifulsoup4/) for html parsing and `openAI` for information extraction.
+Despite being originaly built for disaster news websites, can be easily used for any type of news website with a few tweaks 
 
-THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION;
 
+This proyect was done as a "alumno interno" task (plz change this line asap...)
 
 ## Getting Started
 1. Creating a Website instance:
