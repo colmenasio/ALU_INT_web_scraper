@@ -1,6 +1,6 @@
 import openai
 
-with open("gpt_key.txt") as stream:
+with open("../gpt_keys/keys.txt") as stream:
     keys = list(map(lambda x: x.rstrip("\n", ), stream.readlines()))
     chat = openai.OpenAI(api_key=keys[0], organization=keys[1]).chat.completions
 
