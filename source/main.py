@@ -48,7 +48,7 @@ ICSaMD = Website(web_name_arg="International Charter Space and Major Disasters",
                  title_tag_attr_arg={"class": "asset-title content activation-title"},
                  body_tag_type_arg="div",
                  body_tag_attr_arg={"class": "col-md-12 activation-description-text"},
-                 main_needs_selenium_arg=True,
+                 does_main_needs_selenium_arg=True,
                  base_news_link_arg="https://disasterscharter.org/",
                  encoding_arg="UTF-8"
                  )
@@ -67,11 +67,11 @@ reuters = Website(web_name_arg="Reuters",
                   news_links_whitelist_arg=general_whitelists,
                   base_news_link_arg="https://www.reuters.com",
                   base_next_page_link_arg="https://www.reuters.com/news/archive/tsunami",
-                  news_needs_selenium_arg=True,
+                  do_news_needs_selenium_arg=True,
                   encoding_arg="UTF-8"
                   )
 
 print("Running")
-flood_list.get_links(max_links=100)
+flood_list.get_links(max_links=10)
 print("DISPATCHING LINKS")
-flood_list.dispatch_links(n_of_threads=2, extracting_method_arg="just print")
+flood_list.dispatch_links(n_of_threads=1, extracting_method_arg="generic")
