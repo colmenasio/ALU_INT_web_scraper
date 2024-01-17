@@ -4,6 +4,7 @@ import openai
 
 try:
     with open("../gpt_keys/keys.txt") as stream:
+        # TODO this is horrible. Words cannot describe how horrible it is. i shall F I X I T
         openai_keys = list(map(lambda x: x.rstrip("\n", ), stream.readlines()))
     parser_chat = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
 except FileNotFoundError:
