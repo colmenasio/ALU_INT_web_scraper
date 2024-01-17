@@ -26,9 +26,9 @@ This proyect was done as a "alumno interno" task
 THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION;
 
 
-## Main Features
-1. Website class:
-    - To get started, create an instance of the Website class, specifying the location of relevant link, whitelists, and other parameters:
+## Getting Started
+1. Creating a Website instance:
+    - To get started, specify the location of relevants link, as well as specify whitelists and other parameters:
       ```py
       # Example
       generic_web = Website(web_name_arg="Just a Website",
@@ -46,32 +46,41 @@ THIS VERSION IS INCOMPLETE; ITS MISSING NLP METHODS TO NORMALIZE THE INFORMATION
                      encoding_arg="UTF-8"
                      )
       ```
-    - Each Website intance has an url pipeline of links to be scraped. The method  `get_links` fill the pipeline with links from the main page specified
+      The public interface of the Website class is incredibly minimalistic. Its mainly consists of two methods: `get_links` and `dispatch_links`
+      
+    - The method  `get_links` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
       ```py
       # Example
-      flood_list.get_links(max_links=10)
+      generic_web.get_links(max_links=10)
       ```
-    - Once the pipeline is full, `dispatch_links` scrapes, parses, and (in the future) uses NLP to extract data and send it to a database
+      And so, the pipeline of links is full.
+
+    - Once the pipeline is full, `dispatch_links` scrapes, parses, and uses the openai API to extract data and later send it to the database
       ```py
       # Example
-      flood_list.dispatch_links(n_of_threads=5)
+      generic_web.dispatch_links(n_of_threads=5)
       ```
+      And now, the script is done.
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
 - [x] Method to fetch links to news from the main page
-- [x] Parsing method to standazise said news
-- [x] AI analysis
-    - [ ] Implement API for particular webs
-- [ ] Database Integration
+- [x] Serialize news in a parse-able format
+    - [ ] Implement API for particular webs that offer it 
+- [x] AI analysis yayyy:
+    - [ ] Improve AI precision:
+        - [ ] Better propts
+        - [ ] Fine-tuning the model, perhaps?
+- [ ] Serialization/Database implementation
 
 
 <!-- Doctumentation  -->
 ## Full Documentation
 
 _For more examples, please refer to the [Documentation](https://example.com)_
+NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS THEMSELF ACT AS A BETTER DOCUMENTATION
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
