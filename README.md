@@ -72,6 +72,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
     - [ ] Improve AI precision:
         - [ ] Better propts
         - [ ] Fine-tuning the model, perhaps?
+- [ ] For the love of god please write propper tests
 - [ ] Serialization/Database implementation
 
 
