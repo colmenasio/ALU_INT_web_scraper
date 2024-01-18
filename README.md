@@ -45,9 +45,9 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
                      encoding_arg="UTF-8"
                      )
       ```
-      The public interface of the Website class is incredibly minimalistic. Its mainly consists of two methods: `dispatch_links` and `dispatch_links`
+      The public interface of the Website class is incredibly minimalistic. Its mainly consists of two methods: `auto_fill_pipeline` and `dispatch_links`
       
-    - The method  `dispatch_links` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
+    - The method  `auto_fill_pipeline` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
       ```py
       # Example
       generic_web.auto_fill_pipeline(max_links=10)
