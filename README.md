@@ -50,14 +50,14 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
     - The method  `get_links` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
       ```py
       # Example
-      generic_web.get_links(max_links=10)
+      generic_web.auto_fill_pipeline(max_links=10)
       ```
       And so, the pipeline of links is full.
 
     - Once the pipeline is full, `dispatch_links` scrapes, parses, and uses the openai API to extract data and later send it to the database
       ```py
       # Example
-      generic_web.dispatch_links(n_of_threads=5)
+      generic_web.dispatch_links(n_of_threads_arg=5)
       ```
       And now, the script is done.
 
