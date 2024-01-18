@@ -12,14 +12,16 @@ except FileNotFoundError:
           "A 'keys.txt' file is required for the gpt parser to function \n"
           "Refer to the README in /gpt_keys for more information")
 
-# parser_chat_lock = Lock()  # i think it's not needed due to GIL
+# parser_chat_lock = Lock()  # I think it's not needed due to GIL
 
 
-def classify(new_arg: dict, categories_arg: list) -> str | None :
+def classify(new_arg: dict, categories_arg: list) -> str | None:
     """Classifies a given new into one of the disaster categories.
-    :returns A string containing the category ogf the new, or None if the new does not belong to any of the categories
+
     :param new_arg: A dictionary containing 2 keys: title and body, of the New to be classified.
-    :param categories_arg: List of categories"""
+    :param categories_arg: List of categories.
+    :returns: A string containing the category of the new, or None if the new does not belong to any of the categories.
+    """
     # TODO This function is so bad it's painful to look at, ill rewrite it later
     # TODO make the prompt better and stuff
     classifier_client = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
@@ -44,11 +46,11 @@ def classify(new_arg: dict, categories_arg: list) -> str | None :
 
 def extract_json(new_arg: dict, search_parameters_arg: list) -> str | None:
     """Analyzes the new and finds information according to the search parameters.
-    :returns Either a string formatted in json, or None in case of fatal error
-    :param new_arg: A dictionary containing 2 keys: title and body, of the New to be classified.ç
-    :param search_parameters_arg: A list of parameters to fulfill. Eg; ("date", "number_of_deaths"...)
-    This function is so bad it's painful
-    to look at, ill rewrite it later"""
+    This function is so bad it's painful to look at, ill rewrite it later
+
+    :param new_arg: A dictionary containing 2 keys: title and body, of the New to be classified.
+    :param search_parameters_arg: A list of parameters to fulfill. Eg; ("date", "number_of_deaths"...).
+    :returns: Either a string formatted in json, or None in case of fatal error."""
     # TODO make the prompt better and E N S U R E it outputs correct json
     parser_client = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
     response = parser_client.chat.completions.create(

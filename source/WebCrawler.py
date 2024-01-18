@@ -15,53 +15,56 @@ if __name__ == "__main__":
 class Website:
     """API interface.
     Meant to be instanced once per website.
-    Wraps the methods for processing a new in a convenient way"""
+    Wraps the methods for crawling a website and processing news in a convenient way"""
     sel_options = webdriver.ChromeOptions()
     sel_options.add_argument("--headless")
     sel_driver = webdriver.Chrome(options=sel_options)
     sel_driver.implicitly_wait(time_to_wait=3)
     sel_session_lock = threading.Lock()
 
-    def __init__(self, web_name_arg: str, main_page_link_arg: str,
-                 news_tag_type_arg: str, news_tag_attr_arg: dict,
-                 new_link_tag_type_arg: str, new_link_tag_attr_arg: dict,
-                 title_tag_type_arg: str, title_tag_attr_arg: dict,
-                 body_tag_type_arg: str, body_tag_attr_arg: dict,
+    def __init__(self, web_name_arg: str = None, main_page_link_arg: str = None,
+                 news_tag_type_arg: str = None, news_tag_attr_arg: dict = None,
+                 new_link_tag_type_arg: str = None, new_link_tag_attr_arg: dict = None,
                  next_page_tag_attr_arg: dict = None,
+                 title_tag_type_arg: str = None, title_tag_attr_arg: dict = None,
+                 body_tag_type_arg: str = None, body_tag_attr_arg: dict = None,
                  news_links_blacklist_arg: [str] = None, news_links_whitelist_arg: [str] = None,
                  base_next_page_link_arg: str = "", base_news_link_arg: str = "",
                  scraping_method_arg: str = "generic",
                  does_main_needs_selenium_arg: bool = False, do_news_needs_selenium_arg: bool = False,
                  encoding_arg: str = "UTF-8"):
         """
-        :param web_name_arg:
-        :param main_page_link_arg:
-        :param news_tag_type_arg:
-        :param news_tag_attr_arg:
-        :param new_link_tag_type_arg:
-        :param new_link_tag_attr_arg:
-        :param title_tag_type_arg:
-        :param title_tag_attr_arg:
-        :param body_tag_type_arg:
-        :param body_tag_attr_arg:
-        :param next_page_tag_attr_arg:
+        :param web_name_arg: Website name. Purely aesthetic. Currently useless
+        :param main_page_link_arg: Link to the first page to extract links from
+        :param news_tag_type_arg: Type of the tag that wraps the relevant links together in the main page
+        :param news_tag_attr_arg: Attributes of the tag that wraps the relevant links together in the main page
+        :param new_link_tag_type_arg: Type of the tag that wraps the individual links to be extracted
+        :param new_link_tag_attr_arg: Attributes of the tag that wraps the individual links to be extracted
+        :param next_page_tag_attr_arg: Attributes of the 'a' div containing the link to the next main page
+        :param title_tag_type_arg: Type of the tag that contains the title inside a individual new
+        :param title_tag_attr_arg: Attributes of the tag that contains the title inside a individual new
+        :param body_tag_type_arg: Type of the tag that contains the body inside a individual new
+        :param body_tag_attr_arg: Attributes of the tag that contains the body inside a individual new
         :param news_links_blacklist_arg: re Regex that news links must match to be processed.
-        If None, matches all links. Defaults to None
+            If None, matches all links. Defaults to None
         :param news_links_whitelist_arg: re Regex that news links must not match to be processed.
-        Defaults to None
-        :param base_next_page_link_arg:
-        :param base_news_link_arg:
-        :param scraping_method_arg:
-        :param does_main_needs_selenium_arg:
-        :param do_news_needs_selenium_arg:
-        :param encoding_arg:
+            Defaults to None
+        :param base_next_page_link_arg: Prefix to be added to the relative address of the next page link
+        :param base_news_link_arg: Prefix to be added to the relative addresses of the individual news links
+        :param scraping_method_arg: String indicating the method to be used for scraping individual news
+        :param does_main_needs_selenium_arg: Bool indicating if selenium is needed in the main pages
+            (if server response is required)
+        :param do_news_needs_selenium_arg: Bool indicating if selenium is needed in the main pages
+            (if server response is required)
+        :param encoding_arg: Defaults to UTF-8.
         """
-        # TODO make more default arguments: news_tag_type_arg = "section", title_tag_type = "h1", ect...
-        # TODO documentation :pain:
-        # Man i wish you could do like rust and just write each field once
-        # Also this is a mess but i dont know any other better way
+        # TODO make more default arguments: news_tag_type_arg = "section", title_tag_type = "h1", ect... TODO
+        # TODO: documentation :pain:
+        # TODO some crawling/scraping methods will require different fields than others. Write
+        #   functions that ensure the method called can be run with the current parameters Man i wish you could do
+        #   like rust and just write each field once Also this is a mess but i dont know any other better way
         self.web_name = web_name_arg
-        self.main_link = main_page_link_arg
+        self.main_page_link = main_page_link_arg
         self.news_tag_type = news_tag_type_arg
         self.news_tag_attr = news_tag_attr_arg
         self.new_link_tag_type = new_link_tag_type_arg
@@ -82,12 +85,21 @@ class Website:
 
         self.link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
 
-    def get_links(self, max_links=100) -> None:
-        """Crawls through the main page and get links of relevant instances"""
+    def auto_fill_pipeline(self, link: str = None, max_links=100) -> None:
+        """Recursive crawler function. Extracts individual news links from the main page specified by main_page_link.
+
+        Calls itself on the next page until the max_links have been reached. The links obtained will be added to the
+        pipeline with status: "Not_Yet_Dispatched"
+
+        :param link: Recursion parameter indicating the page to crawl. Defaults to None, in which case crawls the
+            page specified by self->main_page_link
+        :param max_links: Lower bound on the number of links added to the pipeline until recursion ends
+        """
         # TODO: implement a check so that if the collection of links reaches the first link of the last search, it stops
         if max_links <= 0:
             return
-        link = self.main_link
+        if link is None:
+            link = self.main_page_link
         soup = self._get_soup_from_link(link, use_selenium_arg=self.does_main_needs_sel)
         hrefs = self._get_hrefs(soup)
         if hrefs is None:
@@ -96,29 +108,36 @@ class Website:
         next_page_link = self._get_next_page_link(soup)
         if next_page_link is None:
             return
-        # print(f"Length of the page in links: {len(hrefs)}\n next page link: {next_page_link}")
-        self.get_links(overwrite_link_arg=next_page_link, max_links=max_links - len(hrefs))
+        self.auto_fill_pipeline(next_page_link, max_links=max_links - len(hrefs))
 
-    def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads: int = 10,
+    def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads_arg: int = 1,
                        status_filter_arg: str = None) -> None:
-        """Visits links in the pipeline and initialize the consumer threads.
-        -> extracting_method_arg is a string indicating the parsing method"""
+        """Processes links from the pipeline and sends extracted information to the database.
+
+        This function will consume the entire pipeline unless a specific status to consume is provided
+
+        :param extracting_method_arg: string indicating the desired parsing method. Currently implemented:
+            ["generic", "only print"]. Refer the documentation for more information
+        :param n_of_threads_arg: integer indicated the number of consumer threads to be initialized
+        :param status_filter_arg: String indicating a status.
+            Only links that match the indicated status will be dispatched"""
         methods = {"generic": lambda x, link: Website._generic_new_scraping(x, link),
                    "gdacs": lambda x, link: Website._gdacs_new_scraping(x, link),
-                   "just print": lambda _, link: print(link)}
+                   "only print": lambda _, link: print(link)}
         parse_method = methods[extracting_method_arg]
         failed_links = Queue()
         threads = [threading.Thread(target=lambda: self._consumer_thread(parse_method, failed_links, status_filter_arg))
-                   for _ in range(n_of_threads)]
+                   for _ in range(n_of_threads_arg)]
         [x.start() for x in threads]
         self.link_pipeline.join()
         self.link_pipeline = failed_links
 
     def _filter_link(self, link_arg: str) -> bool:
         """Filters a link based on self's whitelists/blacklists. Yeah, that's it.
-        :returns A bool. True if matches the filters, false if it doesn't. Note that to pass the filters, the link must
-        simultaneously be in the whitelists and not be in the whitelists
+
         :param link_arg: A string containing the link to be filtered
+        :returns: True if the link matches the filters, false if it doesn't. Note that to pass the filters, the link
+            must simultaneously be in the whitelists and not be in the whitelists
         """
         warnings.warn("Warning: _filter_link desperately needs testing")
         if len(self.link_whitelist) is None:
@@ -131,16 +150,23 @@ class Website:
         return matches_whitelist and not is_match_blacklist
 
     def _format_link(self, scraped_tag_arg, parse_next_page_link_arg: bool = 0) -> str:
-        """Adds the base address to the relative address."""
+        """Adds the base address to the relative address to get a valis address"""
         base_link = self.next_page_base_link if parse_next_page_link_arg is True else self.news_base_link
         return base_link + scraped_tag_arg["href"]
 
-    def _add_to_pipeline(self, links_arg: [str], status_arg="Not_Yet_Executed"):
-        """kinda irrelevant, only used in get_links. TO BE REMOVED"""
+    def _add_to_pipeline(self, links_arg: [str], status_arg="Not_Yet_Dispatched"):
+        """kinda irrelevant, only used in auto_fill_pipeline. TO BE REMOVED"""
         # TODO remove this xd
         [self.link_pipeline.put({"link": x, "status": status_arg}) for x in links_arg]
 
     def _get_soup_from_link(self, link_arg: str, use_selenium_arg: bool = False) -> BeautifulSoup:
+        """Fetches the html of the given link and instantiates a BeautifulSoup with it
+
+        If the raw source is not enough and the link in question needs waiting for a server response,
+        selenium must be used
+
+        :param link_arg: source of the html
+        :param use_selenium_arg: bool indicating if selenium must be used. Defaults to False"""
         if use_selenium_arg:
             Website.sel_session_lock.acquire()
             Website.sel_driver.get(link_arg)
@@ -152,6 +178,10 @@ class Website:
         return BeautifulSoup(raw_html, "html.parser")
 
     def _get_hrefs(self, soup_arg: BeautifulSoup) -> list[str]:
+        """Given a soup, find all links in the tags that match the ones in self
+
+        First, the tag in which the links are grouped is fetched.
+        Then, the individual links are collected"""
         main_section = soup_arg.find(name=self.news_tag_type, attrs=self.news_tag_attr)
         relevant_a_tags = map(lambda x: x.find(name="a"),
                               main_section.find_all(name=self.new_link_tag_type, attrs=self.new_link_tag_attr))
@@ -159,18 +189,21 @@ class Website:
         return hrefs if len(hrefs) > 0 else None
 
     def _get_next_page_link(self, soup_arg: BeautifulSoup) -> str:
+        """Given a soup, find the link to the next page to be crawled.
+        """
         next_page_tag = soup_arg.find(name="a", attrs=self.next_page_tag_attr)
         return self._format_link(next_page_tag, parse_next_page_link_arg=True) if next_page_tag is not None else None
 
     def _consumer_thread(self, parsing_method_arg, failed_links_queue_arg: Queue, status_filter_arg: str) -> None:
-        """Consumer thread wrapper. Will consume elements from self->link_pipeline until its empty, then dies
+        """Consumer thread wrapper. Will consume elements from self->link_pipeline until its empty, then dies.
+
         :param parsing_method_arg: A method with the following signature: method(self, link)->None. This is the method
-        that the thread will call on each link in th pipeline. It's expected to both
-         extract information and send it to the database
+            that the thread will call on each link in th pipeline. It's expected to both
+            extract information and send it to the database
         :param failed_links_queue_arg: A queue that will be modified in place, where the links that produce an exception
-         or don't match the status filter will go
+            or don't match the status filter will go
         :param status_filter_arg: A string indicating which links of the pipeline will be processed. The rejected links
-        will be added to failed_link_queue
+            will be added to failed_link_queue
         """
         while True:
             try:
@@ -180,9 +213,10 @@ class Website:
                 return
 
     def _thread_main(self, parsing_method_arg, failed_links_queue_arg: Queue, status_filter_arg: str) -> None:
-        """Consumer thread main function. Processes a link modifying both the
+        """Consumer thread main function. Processes a link and mutates both the
         link_pipeline and the failed_link queue in-place.
-        :except queue.Empty, when self->link_pipeline is empty
+
+        :except queue.Empty: When self->link_pipeline is finally empty
         """
         curr_link = self.link_pipeline.get(block=False)
         if status_filter_arg is not None and curr_link["status"] != status_filter_arg:
@@ -202,7 +236,7 @@ class Website:
         return
 
     def _generic_new_scraping(self, link_arg: str) -> None:
-        """Generic method used on news consisting of a title and main body, with no special characteristics"""
+        """Generic extracting method used on news consisting of a title and main body"""
         curr_disaster = self._build_unparsed_disaster(link_arg)
         curr_disaster.classify()
         curr_disaster.extract_data()
@@ -213,9 +247,12 @@ class Website:
         raise NotImplementedError
 
     def _build_unparsed_disaster(self, link_arg: str) -> Disaster:
+        """Disaster instance builder. The returned Disaster type will only have
+        the raw_data and link attributes initialized"""
         soup = self._get_soup_from_link(link_arg, use_selenium_arg=self.do_news_needs_sel)
         title = soup.find(self.title_tag_type, attrs=self.title_tag_attr)
         body = soup.find(self.body_tag_type, attrs=self.body_tag_attr).find_all("p")
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
-        return Disaster({"title": parsed_title, "body": parsed_body}, link_arg)
+        return Disaster(unprocessed_data_arg={"title": parsed_title, "body": parsed_body},
+                        link_arg=link_arg)

@@ -1,14 +1,13 @@
 import GptParser
-
-
-class InvalidCategoryErr(Exception):
-    """To be raised when the classifier wasn't able to classify a given new"""
-    def __init__(self):
-        super.__init__(f"Classifier could not classify the new into any given category")
+from CustomExceptions import InsufficientInformation, InvalidCategoryErr
 
 
 class Disaster:
-    """Class containing several methods to parse a new, process it, and send scraped data to a database"""
+    """Class containing methods to parse a new, process it, and send scraped data to a database
+
+    The idea is to initialize a Disaster instance with some attributes unspecified, and then use the provided methods to
+    fill the remaining ones until the instance is ready to be sent to the database"""
+
     generic_parameters = ("Number of lethal victims (int)", "Number of affected people (int)",
                           "Date of the disaster (date)", "Region (str)")
     subtypes_parameters = {
@@ -18,10 +17,14 @@ class Disaster:
         "Earthquake": generic_parameters
     }
 
-    def __init__(self, unprocessed_data_arg: dict, link_arg: str, category_arg: str = None, data_arg: str = None):
+    def __init__(self, unprocessed_data_arg: dict = None, link_arg: str = None,
+                 category_arg: str = None, data_arg: str = None):
         """
+        Instance constructor. All parameters default to None
+
         :param unprocessed_data_arg: A dictionary containing 2 keys: title and body, of the New
         :param link_arg: A string containing the link to the New
+        :param category_arg
         """
         self.raw_data = unprocessed_data_arg
         self.link = link_arg
@@ -31,17 +34,24 @@ class Disaster:
         self.data = data_arg
 
     def classify(self) -> None:
-        """In-place classification of the new"""
+        """In-place classification of the new. Fills self->category using self->raw_data"""
+        if self.raw_data is None:
+            raise InsufficientInformation(Disaster.classify.__name__, "self.raw_data")
         result = GptParser.classify(self.raw_data, list(Disaster.subtypes_parameters.keys()))
         if result is None:
             raise InvalidCategoryErr()
         self.category = result
 
     def extract_data(self) -> None:
-        """In-place extraction of information"""
+        """In-place extraction of information. Fills the self->data field using self->raw_data and self->category"""
+        if self.raw_data is None or self.category is None:
+            raise InsufficientInformation(Disaster.extract_data.__name__, "self.raw_data and self.category")
         self.data = GptParser.extract_json(self.raw_data, self.subtypes_parameters[self.category])
 
     def save_to_database(self) -> None:
+        """Requires self->category and self->data to be specified"""
+        if self.category is None or self.data is None:
+            raise InsufficientInformation(Disaster.save_to_database.__name__, "self.category and self.data")
         print(f"suppose we send {self} to db\n"
               f"Disaster type: {self.category}\n"
               f"Disaster data: {self.data}")
