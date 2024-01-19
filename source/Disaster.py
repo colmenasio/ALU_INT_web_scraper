@@ -1,5 +1,5 @@
-import GptParser
-from CustomExceptions import InsufficientInformation, InvalidCategoryErr
+from source.CustomExceptions import InsufficientInformation, InvalidCategoryErr
+from source.GptParser import GptParser
 
 
 class Disaster:

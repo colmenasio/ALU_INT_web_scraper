@@ -1,18 +1,18 @@
-import queue
-import warnings
 from bs4 import BeautifulSoup
-from DisasterSubclasses import *
 import re
 import requests
 from selenium import webdriver
+from source.CustomExceptions import InvalidCategoryErr
+from source.Disaster import Disaster
 import threading
-from queue import Queue
+from queue import Queue, Empty
+import warnings
 
 if __name__ == "__main__":
     print("lololololol wrong file. dont delete this its useful for testing xd")
 
 
-class Website:
+class WebCrawler:
     """API interface.
     Meant to be instanced once per website.
     Wraps the methods for crawling a website and processing news in a convenient way"""
@@ -74,8 +74,8 @@ class Website:
         self.title_tag_attr = title_tag_attr_arg
         self.body_tag_type = body_tag_type_arg
         self.body_tag_attr = body_tag_attr_arg
-        self.link_whitelist = news_links_whitelist_arg if news_links_whitelist_arg is not None else []
-        self.link_blacklist = news_links_blacklist_arg if news_links_blacklist_arg is not None else []
+        self.link_whitelist = news_links_whitelist_arg
+        self.link_blacklist = news_links_blacklist_arg
         self.does_main_needs_sel = does_main_needs_selenium_arg
         self.do_news_needs_sel = do_news_needs_selenium_arg
         self.next_page_base_link = base_next_page_link_arg
@@ -121,8 +121,8 @@ class Website:
         :param n_of_threads_arg: integer indicated the number of consumer threads to be initialized
         :param status_filter_arg: String indicating a status.
             Only links that match the indicated status will be dispatched"""
-        methods = {"generic": lambda x, link: Website._generic_new_scraping(x, link),
-                   "gdacs": lambda x, link: Website._gdacs_new_scraping(x, link),
+        methods = {"generic": lambda x, link: WebCrawler._generic_new_scraping(x, link),
+                   "gdacs": lambda x, link: WebCrawler._gdacs_new_scraping(x, link),
                    "only print": lambda _, link: print(link)}
         parse_method = methods[extracting_method_arg]
         failed_links = Queue()
@@ -139,15 +139,17 @@ class Website:
         :returns: True if the link matches the filters, false if it doesn't. Note that to pass the filters, the link
             must simultaneously be in the whitelists and not be in the whitelists
         """
-        warnings.warn("Warning: _filter_link desperately needs testing")
-        if len(self.link_whitelist) is None:
+        if self.link_whitelist is None:
             matches_whitelist = True
         else:
             matches_whitelist = any(map(lambda x: re.match(x, link_arg), self.link_whitelist))
         # True if present in whitelist (or there are no whitelists)
-        is_match_blacklist = any(map(lambda x: re.match(x, link_arg), self.link_blacklist))
+        if self.link_blacklist is None:
+            matches_blacklist = False
+        else:
+            matches_blacklist = any(map(lambda x: re.match(x, link_arg), self.link_blacklist))
         # False if present in blacklist
-        return matches_whitelist and not is_match_blacklist
+        return matches_whitelist and not matches_blacklist
 
     def _format_link(self, scraped_tag_arg, parse_next_page_link_arg: bool = 0) -> str:
         """Adds the base address to the relative address to get a valis address"""
@@ -168,10 +170,10 @@ class Website:
         :param link_arg: source of the html
         :param use_selenium_arg: bool indicating if selenium must be used. Defaults to False"""
         if use_selenium_arg:
-            Website.sel_session_lock.acquire()
-            Website.sel_driver.get(link_arg)
-            raw_html = Website.sel_driver.page_source
-            Website.sel_session_lock.release()
+            WebCrawler.sel_session_lock.acquire()
+            WebCrawler.sel_driver.get(link_arg)
+            raw_html = WebCrawler.sel_driver.page_source
+            WebCrawler.sel_session_lock.release()
         else:
             with requests.get(link_arg) as stream:
                 raw_html = stream.content.decode(self.encoding, errors="replace")
@@ -185,6 +187,7 @@ class Website:
         main_section = soup_arg.find(name=self.news_tag_type, attrs=self.news_tag_attr)
         relevant_a_tags = map(lambda x: x.find(name="a"),
                               main_section.find_all(name=self.new_link_tag_type, attrs=self.new_link_tag_attr))
+
         hrefs = [self._format_link(x) for x in relevant_a_tags if self._filter_link(x["href"])]
         return hrefs if len(hrefs) > 0 else None
 
@@ -209,7 +212,7 @@ class Website:
             try:
                 self._thread_main(parsing_method_arg, failed_links_queue_arg, status_filter_arg)
                 self.link_pipeline.task_done()
-            except queue.Empty:
+            except Empty:
                 return
 
     def _thread_main(self, parsing_method_arg, failed_links_queue_arg: Queue, status_filter_arg: str) -> None:
