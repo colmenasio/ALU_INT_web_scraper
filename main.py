@@ -1,11 +1,11 @@
-from WebCrawler import *
+from source.WebCrawler import Website
 
 source_links_to_implement = [
     "https://gdacs.org/Alerts/default.aspx"
 ]
 
 general_whitelists = [".+quake.+", ".+flood.+", ".+volcan.+", ".+hurricane.+", ".+drought.+", ".+fire.+", ".+tsunami.+",
-                     ".+disease.+", ".+pandem.+", ".+water.+", ".+ rain.+", ".+outbreak.+"]
+                      ".+disease.+", ".+pandem.+", ".+water.+", ".+ rain.+", ".+outbreak.+"]
 
 flood_list = Website(web_name_arg="Flood List",
                      main_page_link_arg="https://floodlist.com/news",
