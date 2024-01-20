@@ -1,22 +1,23 @@
 from __future__ import annotations
+from json import dumps
 import openai
 
 
 class GptParser:
     try:
-        with open("../gpt_keys/keys.txt") as stream:
+        with open("gpt_keys/keys.txt") as stream:
             # TODO this is horrible. Words cannot describe how horrible it is. i shall F I X I T
             openai_keys = list(map(lambda x: x.rstrip("\n", ), stream.readlines()))
         parser_chat = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         print("GPT KEYS NOT FOUND:\n"
               "A 'keys.txt' file is required for the gpt parser to function\n"
-              "Refer to the README in /gpt_keys for more information")
+              "Refer to the README in /gpt_keys for more information", e)
     # parser_chat_lock = Lock()  # I think it's not needed due to GIL
 
     @staticmethod
     def classify(new_arg: dict, categories_arg: list) -> str | None:
-        """Classifies a given new into one of the disaster categories.
+        """Classifies a given new into one of the provided categories.
 
         :param new_arg: A dictionary containing 2 keys: title and body, of the New to be classified.
         :param categories_arg: List of categories.
@@ -29,15 +30,16 @@ class GptParser:
             model="gpt-3.5-turbo",
             messages=[{"role": "system",
                        "content": "You are a news articles classifying tool. The following messages will contain"
-                                  "news articles parsed as python dictionaries, and you must classify them into one of "
+                                  "news articles structured as a json file, and you must classify them into one of "
                                   f"the following categories: {categories_arg}\n."
-                                  "Return a single string containing the category.\n"
-                                  "Return a string containing 'None' if not sure or the new doesnt fit in the categories"},
+                                  "Return a string specifying the category the category the new belongs to.\n"
+                                  "Return 'None' if not sure or the new doesnt fit in the categories"},
                       {"role": "user",
-                       "content": str(new_arg)}])
+                       "content": dumps(new_arg)}])
         try:
             disaster_type = response.choices[0].message.content
         except TypeError:
+            print("whf how did this happen")
             return None
         if disaster_type not in categories_arg:
             return None
@@ -72,8 +74,7 @@ class GptParser:
                                   "particular parameter, its value should be 'null'\n"
                                   "Example:\n "
                                   "New: "
-                                  "{'link': 'generic_new.com', "
-                                  "'title': 'Dozens of people die in a forest fire', "
+                                  "{'title': 'Dozens of people die in a forest fire', "
                                   "'body': 'In the first of may of this year, a fire in a forest in Norway"
                                   "caused the death of dozens of persons and the displacement of 100 persons.'}\n"
                                   "Parameters: ('Date (date)', 'Region (str)', "
@@ -86,7 +87,7 @@ class GptParser:
                                   '}'
                        },
                       {"role": "user",
-                       "content": f"New: {new_arg}\n"
+                       "content": f"New: {dumps(new_arg)}\n"
                                   f"Parameters: {search_parameters_arg}"}
                       ])
 

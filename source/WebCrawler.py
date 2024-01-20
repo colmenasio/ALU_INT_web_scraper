@@ -85,7 +85,7 @@ class WebCrawler:
 
         self.link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
 
-    def auto_fill_pipeline(self, link: str = None, max_links=100) -> None:
+    def auto_fill_pipeline(self, link: str = None, min_links=100) -> None:
         """Recursive crawler function. Extracts individual news links from the main page specified by main_page_link.
 
         Calls itself on the next page until the max_links have been reached. The links obtained will be added to the
@@ -93,10 +93,10 @@ class WebCrawler:
 
         :param link: Recursion parameter indicating the page to crawl. Defaults to None, in which case crawls the
             page specified by self->main_page_link
-        :param max_links: Lower bound on the number of links added to the pipeline until recursion ends
+        :param min_links: Lower bound on the number of links added to the pipeline until recursion ends
         """
         # TODO: implement a check so that if the collection of links reaches the first link of the last search, it stops
-        if max_links <= 0:
+        if min_links <= 0:
             return
         if link is None:
             link = self.main_page_link
@@ -108,7 +108,7 @@ class WebCrawler:
         next_page_link = self._get_next_page_link(soup)
         if next_page_link is None:
             return
-        self.auto_fill_pipeline(next_page_link, max_links=max_links - len(hrefs))
+        self.auto_fill_pipeline(next_page_link, min_links=min_links - len(hrefs))
 
     def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads_arg: int = 1,
                        status_filter_arg: str = None) -> None:
