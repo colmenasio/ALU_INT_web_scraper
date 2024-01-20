@@ -3,8 +3,9 @@ from source.WebCrawler import WebCrawler
 
 
 def run_tests():
-    test_get_hrefs
+    test_get_hrefs()
     test_filters()
+
 
 def test_get_hrefs():
     flood_list = WebCrawler(news_tag_type_arg="main",
@@ -18,6 +19,7 @@ def test_get_hrefs():
     result = flood_list._get_hrefs(soup)
     assert len(result) == 16
     assert all([x is not None for x in result])
+
 
 def test_filters():
     no_filters = WebCrawler()
