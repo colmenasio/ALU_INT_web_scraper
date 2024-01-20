@@ -58,11 +58,11 @@ class WebCrawler:
             (if server response is required)
         :param encoding_arg: Defaults to UTF-8.
         """
-        # TODO make more default arguments: news_tag_type_arg = "section", title_tag_type = "h1", ect... TODO
+        # TODO: this is absolutely horrible remember to eventually change this to use css selectors instead
         # TODO: documentation :pain:
-        # TODO some crawling/scraping methods will require different fields than others. Write
+        # TODO: some crawling/scraping methods will require different fields than others. Write
         #   functions that ensure the method called can be run with the current parameters Man i wish you could do
-        #   like rust and just write each field once Also this is a mess but i dont know any other better way
+        #   like rust and just write each field once Also this is a mess
         self.web_name = web_name_arg
         self.main_page_link = main_page_link_arg
         self.news_tag_type = news_tag_type_arg

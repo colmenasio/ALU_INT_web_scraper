@@ -26,11 +26,11 @@ Despite being originaly built for disaster news websites, can be easily used for
 This proyect was done as a "alumno interno" task (plz change this line asap...)
 
 ## Getting Started
-1. Creating a Website instance:
+1. Creating a `WebCrawler` instance:
     - To get started, specify the location of relevants link, as well as specify whitelists and other parameters:
       ```py
       # Example
-      generic_web = Website(web_name_arg="Just a Website",
+      generic_web = WebCrawler(web_name_arg="Just a Website",
                      main_page_link_arg="https://thingies.com/news",
                      news_tag_type_arg="main",
                      news_tag_attr_arg={"class": "site-main"},
@@ -45,7 +45,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
                      encoding_arg="UTF-8"
                      )
       ```
-      The public interface of the Website class is incredibly minimalistic. Its mainly consists of two methods: `auto_fill_pipeline` and `dispatch_links`
+      The public interface of the `WebCrawler` class is incredibly minimalistic. Its mainly consists of two methods: `auto_fill_pipeline` and `dispatch_links`
       
     - The method  `auto_fill_pipeline` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
       ```py
@@ -65,7 +65,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Method to fetch links to news from the main page
+- [x] Methods to fetch links to news from the main page
 - [x] Serialize news in a parse-able format
     - [ ] Implement API for particular webs that offer it 
 - [x] AI analysis yayyy:
