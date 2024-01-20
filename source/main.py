@@ -71,8 +71,8 @@ reuters = WebCrawler(web_name_arg="Reuters",
                      encoding_arg="UTF-8"
                      )
 
-# print("Running")
-flood_list.auto_fill_pipeline(max_links=20)
-# print("DISPATCHING LINKS")
-# flood_list.dispatch_links(n_of_threads_arg=1, extracting_method_arg="only print")
+print("Running")
+flood_list.auto_fill_pipeline(min_links=5)
+print("DISPATCHING LINKS")
+flood_list.dispatch_links(n_of_threads_arg=1, extracting_method_arg="generic")
 
