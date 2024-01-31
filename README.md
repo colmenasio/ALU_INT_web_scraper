@@ -66,6 +66,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 ## Roadmap
 
 - [x] Methods to fetch links to news from the main page
+    - [ ] Switch to CSS selectors as any normal human being would
 - [x] Serialize news in a parse-able format
     - [ ] Implement API for particular webs that offer it 
 - [x] AI analysis yayyy:
