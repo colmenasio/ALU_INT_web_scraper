@@ -81,7 +81,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 ## Full Documentation
 
 _For more examples, please refer to the [Documentation](Documentacion(EXTREMELY%20OUTDATED).pdf)
-NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS THEMSELF ACT AS A BETTER DOCUMENTATION
+NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS/DOCSTRINGS THEMSELF ACT AS A BETTER DOCUMENTATION FOR NOW
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
