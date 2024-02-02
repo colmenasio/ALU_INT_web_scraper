@@ -27,7 +27,7 @@ class Disaster:
         :param category_arg
         """
         self.raw_data = unprocessed_data_arg
-        self.link = link_arg
+        self.link = link_arg # TODO deprecated attribute, remove it
         # TODO sanitize the category input
         self.category = category_arg
         # TODO sanitize the data input
@@ -53,5 +53,6 @@ class Disaster:
         if self.category is None or self.data is None:
             raise InsufficientInformation(Disaster.save_to_database.__name__, "self.category and self.data")
         print(f"suppose we send {self} to db\n"
+              f"Rawdata: {self.raw_data}\n"
               f"Disaster type: {self.category}\n"
               f"Disaster data: {self.data}")
