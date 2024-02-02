@@ -8,4 +8,4 @@ sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 org-XXXXXXXXXXXXXXXXXXXXX
 ```
 
-Disclaimer: The script that uses this is horribly picky and needs to be fixed asap.
+Disclaimer: The script that uses this file is horribly picky and needs to be fixed asap.

@@ -66,6 +66,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 ## Roadmap
 
 - [x] Methods to fetch links to news from the main page
+    - [ ] Switch to CSS selectors as any normal human being would
 - [x] Serialize news in a parse-able format
     - [ ] Implement API for particular webs that offer it 
 - [x] AI analysis yayyy:
@@ -80,7 +81,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 ## Full Documentation
 
 _For more examples, please refer to the [Documentation](Documentacion(EXTREMELY%20OUTDATED).pdf)
-NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS THEMSELF ACT AS A BETTER DOCUMENTATION
+NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS/DOCSTRINGS THEMSELF ACT AS A BETTER DOCUMENTATION FOR NOW
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
