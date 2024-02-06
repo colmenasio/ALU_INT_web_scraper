@@ -8,17 +8,25 @@ def run_tests():
 
 
 def test_get_hrefs():
-    flood_list = WebCrawler(news_tag_type_arg="main",
-                            news_tag_attr_arg={"id": "more-content", "class": "site-main", "role": "main"},
-                            new_link_tag_type_arg="h2",
-                            new_link_tag_attr_arg={"class": "entry-title", "itemprop": "headline"},
-                            news_links_blacklist_arg=["https://floodlist.com/news/.+"]
-                            )
-    with open("test_samples/floodlist_example.html", errors="ignore") as stream:
+    example_web = WebCrawler(news_tag_type_arg="main",
+                             news_tag_attr_arg={"id": "more-content", "class": "site-main", "role": "main"},
+                             new_link_tag_type_arg="h2",
+                             new_link_tag_attr_arg={"class": "entry-title", "itemprop": "headline"},
+                             news_links_blacklist_arg=["https://floodlist.com/news/.+"]
+                             )
+    with open("test_samples/web_example.html", errors="ignore") as stream:
         soup = BeautifulSoup(stream.read(), "html.parser")
-    result = flood_list._get_hrefs(soup)
+    result = example_web._get_hrefs(soup)
     assert len(result) == 16
     assert all([x is not None for x in result])
+
+
+def test_get_next_page_link():
+    example_web = WebCrawler(next_page_tag_attr_arg={"class": "next page-numbers"})
+    with open("test_samples/web_example.html", errors="ignore") as stream:
+        soup = BeautifulSoup(stream.read(), "html.parser")
+        result = example_web._get_next_page_link(soup)
+    assert result == "https://next_page"
 
 
 def test_filters():

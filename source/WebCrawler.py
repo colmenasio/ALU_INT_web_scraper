@@ -24,16 +24,36 @@ class WebCrawler:
     sel_driver.implicitly_wait(time_to_wait=3)
     sel_session_lock = threading.Lock()
 
-    def __init__(self, web_name_arg: str = None, main_page_link_arg: str = None,
-                 news_tag_type_arg: str = None, news_tag_attr_arg: dict = None,
-                 new_link_tag_type_arg: str = None, new_link_tag_attr_arg: dict = None,
-                 next_page_tag_attr_arg: dict = None,
-                 title_tag_type_arg: str = None, title_tag_attr_arg: dict = None,
-                 body_tag_type_arg: str = None, body_tag_attr_arg: dict = None,
-                 news_links_blacklist_arg: [str] = None, news_links_whitelist_arg: [str] = None,
-                 base_next_page_link_arg: str = "", base_news_link_arg: str = "",
+    def __init__(self,
+                 web_name_arg: str = None,
+                 main_page_link_arg: str = None,
+
+                 news_tag_type_arg: str = None,  # deprecated, remove it
+                 news_tag_attr_arg: dict = None,  # deprecated, remove it
+                 news_wapper_selector_arg: str = None,
+
+                 new_link_tag_type_arg: str = None,  # deprecated, remove it
+                 new_link_tag_attr_arg: dict = None,  # deprecated, remove it
+                 new_link_selector_arg: str = None,
+
+                 next_page_tag_attr_arg: dict = None,  # deprecated, remove it
+                 next_page_link_selector_arg: str = None,
+
+                 title_tag_type_arg: str = None,  # deprecated, remove it
+                 title_tag_attr_arg: dict = None,  # deprecated, remove it
+                 title_selector_arg: str = None,
+
+                 body_tag_type_arg: str = None,  # deprecated, remove it
+                 body_tag_attr_arg: dict = None,  # deprecated, remove it
+                 body_selector_arg: str = None,
+
+                 news_links_blacklist_arg: [str] = None,
+                 news_links_whitelist_arg: [str] = None,
+                 base_next_page_link_arg: str = "",
+                 base_news_link_arg: str = "",
                  scraping_method_arg: str = "generic",
-                 does_main_needs_selenium_arg: bool = False, do_news_needs_selenium_arg: bool = False,
+                 does_main_needs_selenium_arg: bool = False,
+                 do_news_needs_selenium_arg: bool = False,
                  encoding_arg: str = "UTF-8"):
         """
         :param web_name_arg: Website name. Purely aesthetic. Currently useless
@@ -67,15 +87,21 @@ class WebCrawler:
         #   like rust and just write each field once Also this is a mess
         self.web_name = web_name_arg
         self.main_page_link = main_page_link_arg
+
         self.news_tag_type = news_tag_type_arg
         self.news_tag_attr = news_tag_attr_arg
+
         self.new_link_tag_type = new_link_tag_type_arg
         self.new_link_tag_attr = new_link_tag_attr_arg
+
         self.next_page_tag_attr = next_page_tag_attr_arg
+
         self.title_tag_type = title_tag_type_arg
         self.title_tag_attr = title_tag_attr_arg
+
         self.body_tag_type = body_tag_type_arg
         self.body_tag_attr = body_tag_attr_arg
+
         self.link_whitelist = news_links_whitelist_arg
         self.link_blacklist = news_links_blacklist_arg
         self.does_main_needs_sel = does_main_needs_selenium_arg
@@ -157,6 +183,7 @@ class WebCrawler:
 
     def _format_link(self, scraped_tag_arg, parse_next_page_link_arg: bool = 0) -> str:
         """Adds the base address to the relative address to get a valis address"""
+        # TODO move the ["href"] out of this function
         base_link = self.next_page_base_link if parse_next_page_link_arg is True else self.news_base_link
         return base_link + scraped_tag_arg["href"]
 
