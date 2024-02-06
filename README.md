@@ -73,15 +73,14 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
     - [ ] Improve AI precision:
         - [ ] Better propts
         - [ ] Fine-tuning the model, perhaps?
-- [ ] For the love of god please write propper tests
+- [x] For the love of god please write propper tests (kinda done)
 - [ ] Serialization/Database implementation
 
 
 <!-- Doctumentation  -->
 ## Full Documentation
 
-_For more examples, please refer to the [Documentation](Documentacion(EXTREMELY%20OUTDATED).pdf)
-NOTE THAT THE DOCUMENTATION, RN, IS EXTREMELY OUTDATED. THE CODE COMMENTS/DOCSTRINGS THEMSELF ACT AS A BETTER DOCUMENTATION FOR NOW
+_For more examples, please refer to the [Documentation folder](/documentation)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
