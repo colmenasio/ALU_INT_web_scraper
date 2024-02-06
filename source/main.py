@@ -73,6 +73,9 @@ reuters = WebCrawler(web_name_arg="Reuters",
                      encoding_arg="UTF-8"
                      )
 
+# TODO UPDATE THIS FOR THE NEW INTERFACE (selectors)
+# TODO UPDATE THE README AND DOCUMENTATION TO THE NEW INTERFACE (selectors)
+
 print("Running")
 flood_list.auto_fill_pipeline(min_links=20)
 print("DISPATCHING LINKS")
