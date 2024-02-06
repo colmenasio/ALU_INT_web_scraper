@@ -88,19 +88,24 @@ class WebCrawler:
         self.web_name = web_name_arg
         self.main_page_link = main_page_link_arg
 
-        self.news_tag_type = news_tag_type_arg
-        self.news_tag_attr = news_tag_attr_arg
+        self.news_tag_type = news_tag_type_arg  # deprecated, remove it
+        self.news_tag_attr = news_tag_attr_arg  # deprecated, remove it
+        self.news_wapper_selector = news_wapper_selector_arg
 
-        self.new_link_tag_type = new_link_tag_type_arg
-        self.new_link_tag_attr = new_link_tag_attr_arg
+        self.new_link_tag_type = new_link_tag_type_arg  # deprecated, remove it
+        self.new_link_tag_attr = new_link_tag_attr_arg  # deprecated, remove it
+        self.new_link_selector = new_link_selector_arg
 
-        self.next_page_tag_attr = next_page_tag_attr_arg
+        self.next_page_tag_attr = next_page_tag_attr_arg  # deprecated, remove it
+        self.next_page_link_selector = next_page_link_selector_arg
 
-        self.title_tag_type = title_tag_type_arg
-        self.title_tag_attr = title_tag_attr_arg
+        self.title_tag_type = title_tag_type_arg  # deprecated, remove it
+        self.title_tag_attr = title_tag_attr_arg  # deprecated, remove it
+        self.title_selector = title_selector_arg
 
-        self.body_tag_type = body_tag_type_arg
-        self.body_tag_attr = body_tag_attr_arg
+        self.body_tag_type = body_tag_type_arg  # deprecated, remove it
+        self.body_tag_attr = body_tag_attr_arg  # deprecated, remove it
+        self.body_selector = body_selector_arg
 
         self.link_whitelist = news_links_whitelist_arg
         self.link_blacklist = news_links_blacklist_arg
