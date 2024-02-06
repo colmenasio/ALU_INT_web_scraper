@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from bs4 import BeautifulSoup
 import re
 import requests
@@ -103,6 +105,8 @@ class WebCrawler:
         soup = self._get_soup_from_link(link, use_selenium_arg=self.does_main_needs_sel)
         hrefs = self._get_hrefs(soup)
         if hrefs is None:
+            print("auto_fill_pipeline stopped prematurely. "
+                  "Either there are not enough link in the page or a selector didnt work")
             return
         self._add_to_pipeline(hrefs)
         next_page_link = self._get_next_page_link(soup)
@@ -158,8 +162,10 @@ class WebCrawler:
 
     def _add_to_pipeline(self, links_arg: [str], status_arg="Not_Yet_Dispatched"):
         """kinda irrelevant, only used in auto_fill_pipeline. TO BE REMOVED"""
-        # TODO remove this xd
-        [self.link_pipeline.put({"link": x, "status": status_arg}) for x in links_arg]
+        # TODO refactor this xd
+        for x in links_arg:
+            self.link_pipeline.put({"link": x, "status": status_arg})
+        # Alt way: [self.link_pipeline.put({"link": x, "status": status_arg}) for x in links_arg]
 
     def _get_soup_from_link(self, link_arg: str, use_selenium_arg: bool = False) -> BeautifulSoup:
         """Fetches the html of the given link and instantiates a BeautifulSoup with it
@@ -191,9 +197,12 @@ class WebCrawler:
         hrefs = [self._format_link(x) for x in relevant_a_tags if self._filter_link(x["href"])]
         return hrefs if len(hrefs) > 0 else None
 
-    def _get_next_page_link(self, soup_arg: BeautifulSoup) -> str:
-        """Given a soup, find the link to the next page to be crawled.
+    def _get_next_page_link(self, soup_arg: BeautifulSoup) -> str | None:
+        """Given a soup, find the link to the next page to be crawled. Returns None if no tag attributes were specified
         """
+        # TODO this needs a "h e a v y" rework when switching to selectors
+        if self.next_page_tag_attr is None:
+            return None
         next_page_tag = soup_arg.find(name="a", attrs=self.next_page_tag_attr)
         return self._format_link(next_page_tag, parse_next_page_link_arg=True) if next_page_tag is not None else None
 

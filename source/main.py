@@ -37,6 +37,8 @@ relief_web = WebCrawler(web_name_arg="Relief Web",
                         encoding_arg="UTF-8"
                         )
 
+# WARNING!!! ICSaMD has a single main page so when extracting links from it, the pipeline gets full with idk 800 links
+# Basically it gets kinda slow when dispaching cause, yk, its 800 links
 ICSaMD = WebCrawler(web_name_arg="International Charter Space and Major Disasters",
                     main_page_link_arg="https://disasterscharter.org/web/guest/"
                                        "charter-activations?from=01+01+2000&to=27+11+2023",
@@ -72,7 +74,7 @@ reuters = WebCrawler(web_name_arg="Reuters",
                      )
 
 print("Running")
-relief_web.auto_fill_pipeline(min_links=20)
+ICSaMD.auto_fill_pipeline(min_links=20)
 print("DISPATCHING LINKS")
-relief_web.dispatch_links(n_of_threads_arg=1, extracting_method_arg="generic")
+ICSaMD.dispatch_links(n_of_threads_arg=1, extracting_method_arg="only print")
 
