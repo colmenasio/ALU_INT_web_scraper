@@ -52,7 +52,12 @@ class Disaster:
         """Requires self->category and self->data to be specified"""
         if self.category is None or self.data is None:
             raise InsufficientInformation(Disaster.save_to_database.__name__, "self.category and self.data")
-        print(f"suppose we send {self} to db\n"
+        print(f"suppose we send {self.__repr__()} to db\n"
               f"Rawdata: {self.raw_data}\n"
               f"Disaster type: {self.category}\n"
               f"Disaster data: {self.data}")
+
+    def __str__(self):
+        print(f"Object: {self.__repr__()}\n"
+              f"Unparsed Data: {self.raw_data}"
+              f"Link: {self.link}")
