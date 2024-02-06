@@ -4,14 +4,11 @@ from source.WebCrawler import WebCrawler
 
 def run_tests():
     test_get_hrefs()
-    test_filters()
 
 
 def test_get_hrefs():
-    example_web = WebCrawler(news_tag_type_arg="main",
-                             news_tag_attr_arg={"id": "more-content", "class": "site-main", "role": "main"},
-                             new_link_tag_type_arg="h2",
-                             new_link_tag_attr_arg={"class": "entry-title", "itemprop": "headline"},
+    example_web = WebCrawler(news_wapper_selector_arg="main.site-main",
+                             new_link_selector_arg="article.page-article > h2 > a",
                              news_links_blacklist_arg=["https://floodlist.com/news/.+"]
                              )
     with open("test_samples/web_example.html", errors="ignore") as stream:
@@ -22,11 +19,20 @@ def test_get_hrefs():
 
 
 def test_get_next_page_link():
-    example_web = WebCrawler(next_page_tag_attr_arg={"class": "next page-numbers"})
+    example_web1 = WebCrawler(next_page_link_selector_arg="a.next")
     with open("test_samples/web_example.html", errors="ignore") as stream:
         soup = BeautifulSoup(stream.read(), "html.parser")
-        result = example_web._get_next_page_link(soup)
+        result = example_web1._get_next_page_link(soup)
     assert result == "https://next_page"
+    example_web2 = "<html></html>"
+
+
+def test_build_unparsed_disaster():
+    example_web = WebCrawler(title_selector_arg="h1.entry-title", body_selector_arg="div.entry-content > p")
+    with open("test_samples/new_example.html", errors="ignore") as stream:
+        soup = BeautifulSoup(stream.read(), "html.parser")
+    result = example_web._build_unparsed_disaster(soup, "xdddd")
+    print(result)
 
 
 def test_filters():
@@ -42,10 +48,10 @@ def test_filters():
         news_links_blacklist_arg=[".*SIKE.*"]
     )
     links = ["wfnodaoaccept_thisaefnsepoid", "efnfsofnsofnpa", "sofnisfonSIKEdobad", "dspenfeoinfaccept_thisdaoiSIKE"]
-    assert [no_filters._filter_link(x) for x in links] == [True, True, True, True]
-    assert [only_whitelists._filter_link(x) for x in links] == [True, False, False, True]
-    assert [only_blacklists._filter_link(x) for x in links] == [True, True, False, False]
-    assert [both_filters._filter_link(x) for x in links] == [True, False, False, False]
+    assert [no_filters._matches_filters(x) for x in links] == [True, True, True, True]
+    assert [only_whitelists._matches_filters(x) for x in links] == [True, False, False, True]
+    assert [only_blacklists._matches_filters(x) for x in links] == [True, True, False, False]
+    assert [both_filters._matches_filters(x) for x in links] == [True, False, False, False]
 
 
 if __name__ == "__main__":
