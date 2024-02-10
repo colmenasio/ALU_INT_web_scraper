@@ -12,7 +12,7 @@ class GptParser:
     except FileNotFoundError as e:
         print(f"GPT KEYS NOT FOUND (Looked in {__file__}):\n"
               "A 'keys.txt' file is required for the gpt parser to function\n"
-              "Refer to the README in /gpt_keys for more information", e)
+              "Refer to the README in /gpt_keys for more information\n", e)
         raise FileNotFoundError
 
     # parser_chat = openai.OpenAI(api_key=openai_keys[0], organization=openai_keys[1])
