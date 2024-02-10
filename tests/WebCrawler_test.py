@@ -7,9 +7,9 @@ def run_tests():
 
 
 def test_get_hrefs():
-    example_web = WebCrawler(news_wapper_selector_arg="main.site-main",
-                             new_link_selector_arg="article.page-article > h2 > a",
-                             news_links_blacklist_arg=["https://floodlist.com/news/.+"]
+    example_web = WebCrawler(news_wapper_selector="main.site-main",
+                             new_link_selector="article.page-article > h2 > a",
+                             news_links_blacklist=["https://floodlist.com/news/.+"]
                              )
     with open("test_samples/web_example.html", errors="ignore") as stream:
         soup = BeautifulSoup(stream.read(), "html.parser")
@@ -19,7 +19,7 @@ def test_get_hrefs():
 
 
 def test_get_next_page_link():
-    example_web1 = WebCrawler(next_page_link_selector_arg="a.next")
+    example_web1 = WebCrawler(next_page_link_selector="a.next")
     with open("test_samples/web_example.html", errors="ignore") as stream:
         soup = BeautifulSoup(stream.read(), "html.parser")
         result = example_web1._get_next_page_link(soup)
@@ -28,7 +28,7 @@ def test_get_next_page_link():
 
 
 def test_build_unparsed_disaster():
-    example_web = WebCrawler(title_selector_arg="h1.entry-title", body_selector_arg="div.entry-content > p")
+    example_web = WebCrawler(title_selector="h1.entry-title", body_selector="div.entry-content > p")
     with open("test_samples/new_example.html", errors="ignore") as stream:
         soup = BeautifulSoup(stream.read(), "html.parser")
     result = example_web._build_unparsed_disaster(soup, "xdddd")
@@ -38,14 +38,14 @@ def test_build_unparsed_disaster():
 def test_filters():
     no_filters = WebCrawler()
     only_whitelists = WebCrawler(
-        news_links_whitelist_arg=[".+accept_this.*"]
+        news_links_whitelist=[".+accept_this.*"]
     )
     only_blacklists = WebCrawler(
-        news_links_blacklist_arg=[".*SIKE.*"]
+        news_links_blacklist=[".*SIKE.*"]
     )
     both_filters = WebCrawler(
-        news_links_whitelist_arg=[".*accept_this.*"],
-        news_links_blacklist_arg=[".*SIKE.*"]
+        news_links_whitelist=[".*accept_this.*"],
+        news_links_blacklist=[".*SIKE.*"]
     )
     links = ["wfnodaoaccept_thisaefnsepoid", "efnfsofnsofnpa", "sofnisfonSIKEdobad", "dspenfeoinfaccept_thisdaoiSIKE"]
     assert [no_filters._matches_filters(x) for x in links] == [True, True, True, True]
