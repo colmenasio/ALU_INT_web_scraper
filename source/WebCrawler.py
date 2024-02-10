@@ -17,75 +17,97 @@ if __name__ == "__main__":
 class WebCrawler:
     """API interface.
     Meant to be instanced once per website.
-    Wraps the methods for crawling a website and processing news in a convenient way"""
+    Wraps the methods for crawling a website and processing news in a convenient way
+    Can be initialized with either arguments or a dictionary of arguments"""
     sel_options = webdriver.ChromeOptions()
     sel_options.add_argument("--headless")
     sel_driver = webdriver.Chrome(options=sel_options)
     sel_driver.implicitly_wait(time_to_wait=3)
     sel_session_lock = threading.Lock()
 
+    DEFINITIONS_PATH = "../website_definitions/definitions"
+
     def __init__(self,
-                 web_name_arg: str = None,
-                 main_page_link_arg: str = None,
+                 web_name: str = None,
+                 main_page_link: str = None,
 
-                 news_wapper_selector_arg: str = None,
-                 new_link_selector_arg: str = None,
-                 next_page_link_selector_arg: str = None,
-                 title_selector_arg: str = None,
-                 body_selector_arg: str = None,
+                 news_wapper_selector: str = None,
+                 new_link_selector: str = None,
+                 next_page_link_selector: str = None,
+                 title_selector: str = None,
+                 body_selector: str = None,
 
-                 news_links_blacklist_arg: [str] = None,
-                 news_links_whitelist_arg: [str] = None,
+                 news_links_blacklist: [str] = None,
+                 news_links_whitelist: [str] = None,
 
-                 base_next_page_link_arg: str = "",
-                 base_news_link_arg: str = "",
-                 does_main_needs_selenium_arg: bool = False,
-                 do_news_needs_selenium_arg: bool = False,
-                 encoding_arg: str = "UTF-8"):
+                 base_next_page_link: str = "",
+                 base_news_link: str = "",
+                 does_main_needs_selenium: bool = False,
+                 do_news_needs_selenium: bool = False,
+                 encoding: str = "UTF-8",
+
+                 **kwargs
+                 ):
         """
-        :param web_name_arg: Website name. Purely aesthetic. Currently useless
-        :param main_page_link_arg: Link to the first page to extract links from
-        :param news_wapper_selector_arg: Selector to the tag that wraps relevant news articles
-        :param new_link_selector_arg: Selector to the 'a' tag containing the link to a new
+        :param web_name: Website name. Purely aesthetic. Currently useless
+        :param main_page_link: Link to the first page to extract links from
+        :param news_wapper_selector: Selector to the tag that wraps relevant news articles
+        :param new_link_selector: Selector to the 'a' tag containing the link to a new
             (relative to the news_wrapper_selector)
-        :param next_page_link_selector_arg: Selector to the 'a' tag containing the href of the next page to crawl
-        :param title_selector_arg: Selector to the title of the new
-        :param body_selector_arg: Seletor to the different paragrafs of text in the new
-        :param news_links_blacklist_arg: re Regex that news links must match to be processed.
+        :param next_page_link_selector: Selector to the 'a' tag containing the href of the next page to crawl
+        :param title_selector: Selector to the title of the new
+        :param body_selector: Seletor to the different paragrafs of text in the new
+        :param news_links_blacklist: re Regex that news links must match to be processed.
             If None, matches all links. Defaults to None
-        :param news_links_whitelist_arg: re Regex that news links must not match to be processed.
+        :param news_links_whitelist: re Regex that news links must not match to be processed.
             Defaults to None
-        :param base_next_page_link_arg: Prefix to be added to the relative address of the next page link
-        :param base_news_link_arg: Prefix to be added to the relative addresses of the individual news links
-        :param does_main_needs_selenium_arg: Bool indicating if selenium is needed in the main pages
+        :param base_next_page_link: Prefix to be added to the relative address of the next page link
+        :param base_news_link: Prefix to be added to the relative addresses of the individual news links
+        :param does_main_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
-        :param do_news_needs_selenium_arg: Bool indicating if selenium is needed in the main pages
+        :param do_news_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
-        :param encoding_arg: Defaults to UTF-8.
+        :param encoding: Defaults to UTF-8.
         """
-        # TODO: this is absolutely horrible remember to eventually change this to use css selectors instead
-        # TODO: documentation :pain:
+        # TODO: IMPORTANT!!
+        #   Since the kwargs just overwrite the default values, and "not-expected" values just arent used, its kinda
+        #   difficult to know wether the instance was initialized correctly or not
+        #   (eg: one could supply webname instead of web_name,
+        #   then self.web_name would be None and there would be no easy way of checking)
         # TODO: some crawling/scraping methods will require different fields than others. Write
-        #   functions that ensure the method called can be run with the current parameters Man i wish you could do
-        #   like rust and just write each field once Also this is a mess
-        self.web_name = web_name_arg
-        self.main_page_link = main_page_link_arg
+        #   functions that ensure the method called can be run with the current parameters Man i wish you could
+        #   do like rust and just write each field once
+        #  TODO Also this is a mess
+        self._web_name = web_name
+        self._main_page_link = main_page_link
 
-        self.news_wapper_selector = news_wapper_selector_arg
-        self.new_link_selector = new_link_selector_arg
-        self.next_page_link_selector = next_page_link_selector_arg
-        self.title_selector = title_selector_arg
-        self.body_selector = body_selector_arg
+        self._news_wapper_selector = news_wapper_selector
+        self._new_link_selector = new_link_selector
+        self._next_page_link_selector = next_page_link_selector
+        self._title_selector = title_selector
+        self._body_selector = body_selector
 
-        self.link_whitelist = news_links_whitelist_arg
-        self.link_blacklist = news_links_blacklist_arg
-        self.does_main_needs_sel = does_main_needs_selenium_arg
-        self.do_news_needs_sel = do_news_needs_selenium_arg
-        self.next_page_base_link = base_next_page_link_arg
-        self.news_base_link = base_news_link_arg
-        self.encoding = encoding_arg
+        self._link_whitelist = news_links_whitelist
+        self._link_blacklist = news_links_blacklist
+        self._does_main_needs_sel = does_main_needs_selenium
+        self._do_news_needs_sel = do_news_needs_selenium
+        self._next_page_base_link = base_next_page_link
+        self._news_base_link = base_news_link
+        self._encoding = encoding
 
-        self.link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
+        self._link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
+
+    @staticmethod
+    def build_from_json(file_name_arg: str) -> WebCrawler:
+        """Factory method initializing a crawler from a single file in the definitions folder
+        :param file_name_arg: eg: 'web1.json'
+        """
+        pass
+
+    @staticmethod
+    def build_all_from_json() -> [WebCrawler]:
+        """Factory method initializing a crawler from each file in the definitions folder"""
+        pass
 
     def auto_fill_pipeline(self, link: str = None, min_links=100) -> None:
         """Recursive crawler function. Extracts individual news links from the main page specified by main_page_link.
@@ -101,8 +123,8 @@ class WebCrawler:
         if min_links <= 0:
             return
         if link is None:
-            link = self.main_page_link
-        soup = self._get_soup_from_link(link, use_selenium_arg=self.does_main_needs_sel)
+            link = self._main_page_link
+        soup = self._get_soup_from_link(link, use_selenium_arg=self._does_main_needs_sel)
         hrefs = self._get_hrefs(soup)
         if hrefs is None:
             print("auto_fill_pipeline stopped prematurely. "
@@ -132,9 +154,10 @@ class WebCrawler:
         failed_links = Queue()
         threads = [threading.Thread(target=lambda: self._consumer_thread(parse_method, failed_links, status_filter_arg))
                    for _ in range(n_of_threads_arg)]
-        [x.start() for x in threads]
-        self.link_pipeline.join()
-        self.link_pipeline = failed_links
+        for thread in threads:
+            thread.start()
+        self._link_pipeline.join()
+        self._link_pipeline = failed_links
 
     def _matches_filters(self, link_arg: str) -> bool:
         """Filters a link based on self's whitelists/blacklists. Yeah, that's it.
@@ -143,29 +166,29 @@ class WebCrawler:
         :returns: True if the link matches the filters, false if it doesn't. Note that to pass the filters, the link
             must simultaneously be in the whitelists and not be in the whitelists
         """
-        if self.link_whitelist is None:
+        if self._link_whitelist is None:
             matches_whitelist = True
         else:
-            matches_whitelist = any(map(lambda x: re.match(x, link_arg), self.link_whitelist))
+            matches_whitelist = any(map(lambda x: re.match(x, link_arg), self._link_whitelist))
         # True if present in whitelist (or there are no whitelists)
-        if self.link_blacklist is None:
+        if self._link_blacklist is None:
             matches_blacklist = False
         else:
-            matches_blacklist = any(map(lambda x: re.match(x, link_arg), self.link_blacklist))
+            matches_blacklist = any(map(lambda x: re.match(x, link_arg), self._link_blacklist))
         # False if present in blacklist
         return matches_whitelist and not matches_blacklist
 
     def _format_link(self, relative_link: str, is_next_page_link_arg: bool = False) -> str:
         """Adds the base address to the relative address to get a valis address"""
         # TODO move the ["href"] out of this function
-        base_link = self.next_page_base_link if is_next_page_link_arg is True else self.news_base_link
+        base_link = self._next_page_base_link if is_next_page_link_arg is True else self._news_base_link
         return base_link + relative_link
 
     def _add_to_pipeline(self, links_arg: [str], status_arg="Not_Yet_Dispatched"):
         """kinda irrelevant, only used in auto_fill_pipeline. TO BE REMOVED"""
         # TODO refactor this xd
         for x in links_arg:
-            self.link_pipeline.put({"link": x, "status": status_arg})
+            self._link_pipeline.put({"link": x, "status": status_arg})
         # Alt way: [self.link_pipeline.put({"link": x, "status": status_arg}) for x in links_arg]
 
     def _get_soup_from_link(self, link_arg: str, use_selenium_arg: bool = False) -> BeautifulSoup:
@@ -183,7 +206,7 @@ class WebCrawler:
             WebCrawler.sel_session_lock.release()
         else:
             with requests.get(link_arg) as stream:
-                raw_html = stream.content.decode(self.encoding, errors="replace")
+                raw_html = stream.content.decode(self._encoding, errors="replace")
         return BeautifulSoup(raw_html, "html.parser")
 
     def _get_hrefs(self, soup_arg: BeautifulSoup) -> list[str]:
@@ -191,10 +214,10 @@ class WebCrawler:
 
         First, the tag in which the links are grouped is fetched.
         Then, the individual links are collected"""
-        main_section = soup_arg.select_one(self.news_wapper_selector)
+        main_section = soup_arg.select_one(self._news_wapper_selector)
         if main_section is None:
             raise ValueError("Invalid news_wapper_selector")
-        relevant_a_tags = main_section.select(self.new_link_selector)
+        relevant_a_tags = main_section.select(self._new_link_selector)
 
         hrefs = []  # The next chunk of code looks horribke but it will make error handling eaiser in the long run
         for tag in relevant_a_tags:
@@ -208,9 +231,9 @@ class WebCrawler:
         """Given a soup, find the link to the next page to be crawled.
         Returns None if no tag attributes were specified
         """
-        if self.next_page_link_selector is None:
+        if self._next_page_link_selector is None:
             return None
-        next_page_tag = soup_arg.select_one(self.next_page_link_selector)
+        next_page_tag = soup_arg.select_one(self._next_page_link_selector)
         if next_page_tag is None:
             raise ValueError("Invalid next_page_link_selector")
         return self._format_link(next_page_tag["href"], is_next_page_link_arg=True)
@@ -229,7 +252,7 @@ class WebCrawler:
         while True:
             try:
                 self._thread_main(parsing_method_arg, failed_links_queue_arg, status_filter_arg)
-                self.link_pipeline.task_done()
+                self._link_pipeline.task_done()
             except Empty:
                 return
 
@@ -239,7 +262,7 @@ class WebCrawler:
 
         :except queue.Empty: When self->link_pipeline is finally empty
         """
-        curr_link = self.link_pipeline.get(block=False)
+        curr_link = self._link_pipeline.get(block=False)
         if status_filter_arg is not None and curr_link["status"] != status_filter_arg:
             failed_links_queue_arg.put(curr_link)
             return
@@ -271,8 +294,8 @@ class WebCrawler:
     def _build_unparsed_disaster(self, soup_arg: BeautifulSoup, link_arg: str) -> Disaster:
         """Disaster instance builder. The returned Disaster type will only have
         the raw_data and link attributes initialized"""
-        title = soup_arg.select_one(self.title_selector)
-        body = soup_arg.select(self.body_selector)
+        title = soup_arg.select_one(self._title_selector)
+        body = soup_arg.select(self._body_selector)
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
         return Disaster(unprocessed_data_arg={"title": parsed_title, "body": parsed_body},
