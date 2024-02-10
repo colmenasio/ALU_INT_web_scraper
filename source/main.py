@@ -1,33 +1,10 @@
 from WebCrawler import WebCrawler
 
-source_links_to_implement = [
-    "https://gdacs.org/Alerts/default.aspx"
-]
+# TODO implement "https://gdacs.org/Alerts/default.aspx" api
 
 general_whitelists = [".+quake.+", ".+flood.+", ".+volcan.+", ".+hurricane.+", ".+drought.+", ".+fire.+", ".+tsunami.+",
                       ".+disease.+", ".+pandem.+", ".+water.+", ".+ rain.+", ".+outbreak.+"]
 
-flood_list = WebCrawler(web_name="Flood List",
-                        main_page_link="https://floodlist.com/news",
-                        news_wapper_selector="main.site-main",
-                        new_link_selector="article.page-article > h2 > a",
-                        next_page_link_selector="a.next",
-                        title_selector="h1.entry-title",
-                        body_selector="div.entry-content > p",
-                        news_links_blacklist=["https://floodlist.com/news/.+"],
-                        encoding="UTF-8"
-                        )
-flood_list_dictionary = {
-    'web_name': "Flood List",
-    'main_page_link': "https://floodlist.com/news",
-    'news_wapper_selector': "main.site-main",
-    'new_link_selector': "article.page-article > h2 > a",
-    'next_page_link_selector': "a.next",
-    'title_selector': "h1.entry-title",
-    'body_selector': "div.entry-content > p",
-    'news_links_blacklist': ["https://floodlist.com/news/.+"],
-    'encoding': "UTF-8"
-}
 # relief_web = WebCrawler(web_name_arg="Relief Web",
 #                         main_page_link_arg="https://reliefweb.int/updates?list=Updates%20%28Headlines%29&view=headlines",
 #                         news_tag_type_arg="section",
