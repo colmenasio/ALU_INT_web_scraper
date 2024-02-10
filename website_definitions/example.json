@@ -1,0 +1,11 @@
+{
+    "web_name": "example",
+    "main_page_link": "https://example.com/news",
+    "news_wapper_selector": "main.articles",
+    "new_link_selector": ".article > a",
+    "next_page_link_selector": "a.next_page",
+    "title_selector": "h1.title",
+    "body_selector": "div.content > p",
+    "news_links_blacklist": ["https://floodlist.com/unrelated_stuff/.+"],
+    "encoding": "UTF-8"
+}

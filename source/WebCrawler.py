@@ -1,14 +1,17 @@
 from __future__ import annotations
-
 from bs4 import BeautifulSoup
+from os import listdir
+from selenium import webdriver
+from queue import Queue, Empty
+
+import json
 import re
 import requests
-from selenium import webdriver
+import threading
+import warnings
+
 from source.CustomExceptions import InvalidCategoryErr
 from source.Disaster import Disaster
-import threading
-from queue import Queue, Empty
-import warnings
 
 if __name__ == "__main__":
     print("lololololol wrong file. dont delete this its useful for testing xd")
@@ -69,11 +72,6 @@ class WebCrawler:
             (if server response is required)
         :param encoding: Defaults to UTF-8.
         """
-        # TODO: IMPORTANT!!
-        #   Since the kwargs just overwrite the default values, and "not-expected" values just arent used, its kinda
-        #   difficult to know wether the instance was initialized correctly or not
-        #   (eg: one could supply webname instead of web_name,
-        #   then self.web_name would be None and there would be no easy way of checking)
         # TODO: some crawling/scraping methods will require different fields than others. Write
         #   functions that ensure the method called can be run with the current parameters Man i wish you could
         #   do like rust and just write each field once
@@ -98,16 +96,34 @@ class WebCrawler:
         self._link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
 
     @staticmethod
+    def build_from_dict(arguments: dict) -> WebCrawler:
+        """Factory method initializing a crawler from a dictionary"""
+        warnings.warn(
+            "The method (build_from_dict) isnt fully implemented and, even tho it does instanciate "
+            "as it should, it does not check if the parameters given are correct or not\n"
+            "(check source for more info)")
+        # TODO: IMPORTANT!!
+        #   Since the kwargs just overwrite the default values, and "not-expected" values just arent used, its kinda
+        #   difficult to know wether the instance was initialized correctly or not
+        #   (eg: one could supply webname instead of web_name,
+        #   then self.web_name would be None and there would be no easy way of checking)
+        return WebCrawler(**arguments)
+
+    @staticmethod
     def build_from_json(file_name_arg: str) -> WebCrawler:
-        """Factory method initializing a crawler from a single file in the definitions folder
+        """Factory method initializing a crawler from a single file in the 'definitions' folder
         :param file_name_arg: eg: 'web1.json'
         """
-        pass
+        # TODO add error handling
+        with open(WebCrawler.DEFINITIONS_PATH+"/"+file_name_arg) as fstream:
+            parsed_json = json.load(fstream)
+        return WebCrawler.build_from_dict(parsed_json)
 
     @staticmethod
     def build_all_from_json() -> [WebCrawler]:
         """Factory method initializing a crawler from each file in the definitions folder"""
-        pass
+        definitions = listdir(WebCrawler.DEFINITIONS_PATH)
+        return [WebCrawler.build_from_json(file_name) for file_name in definitions if file_name.endswith(".json")]
 
     def auto_fill_pipeline(self, link: str = None, min_links=100) -> None:
         """Recursive crawler function. Extracts individual news links from the main page specified by main_page_link.
