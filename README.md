@@ -20,31 +20,32 @@
 
 # Disaster Information Web Scraper
 Web Scraper, built in Python using [`BeautifulSoup`](https://pypi.org/project/beautifulsoup4/) for html parsing and [`openAI`](https://openai.com/) for information extraction.
-Despite being originaly built for disaster news websites, can be easily used for any type of news website with a few tweaks 
+Despite being originaly built for disaster news websites, can be easily tweaked to work with any type of news website
 
 
 This proyect was done as a "alumno interno" task (plz change this line asap...)
 
 ## Getting Started
 1. Creating a `WebCrawler` instance:
-    - To get started, specify the location of relevants link, as well as specify whitelists and other parameters:
+    - The crawler needs the relevant selectors and metadata needed for, well, crawling the web. Said parameters are provided during instanciation. Either specify them directly...
       ```py
       # Example
-      generic_web = WebCrawler(web_name_arg="Just a Website",
-                     main_page_link_arg="https://thingies.com/news",
-                     news_tag_type_arg="main",
-                     news_tag_attr_arg={"class": "site-main"},
-                     new_link_tag_type_arg="h2",
-                     new_link_tag_attr_arg={"class": "entry-title"},
-                     next_page_tag_attr_arg={"class": "next page-numbers"},
-                     title_tag_type_arg="h1",
-                     title_tag_attr_arg={"itemprop": "headline"},
-                     body_tag_type_arg="div",
-                     body_tag_attr_arg={"itemprop": "articleBody"},
-                     news_links_blacklist_arg=["https://website/not_related_stuff/.+"],
-                     encoding_arg="UTF-8"
-                     )
+      generic_web = WebCrawler(
+          "web_name": "example",
+          "main_page_link": "https://example.com/news",
+          "news_wapper_selector": "main.articles",
+          "new_link_selector": ".article > a",
+          "next_page_link_selector": "a.next_page",
+          "title_selector": "h1.title",
+          "body_selector": "div.content > p",
+          "news_links_blacklist": ["https://example.com/unrelated_stuff/.+"],
+          )
       ```
+      ...or use one of the provided builders for convinience:
+      ```py
+      generic_web = WebCrawler.build_from_json("example.json")
+      ```
+      
       The public interface of the `WebCrawler` class is incredibly minimalistic. Its mainly consists of two methods: `auto_fill_pipeline` and `dispatch_links`
       
     - The method  `auto_fill_pipeline` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
@@ -66,12 +67,12 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 ## Roadmap
 
 - [x] Methods to fetch links to news from the main page
-    - [ ] Switch to CSS selectors as any normal human being would
+    - [x] Switch to CSS selectors as any normal human being would
 - [x] Serialize news in a parse-able format
     - [ ] Implement API for particular webs that offer it 
 - [x] AI analysis yayyy:
     - [ ] Improve AI precision:
-        - [ ] Better propts
+        - [x] Better propts
         - [ ] Fine-tuning the model, perhaps?
 - [x] For the love of god please write propper tests (kinda done)
 - [ ] Serialization/Database implementation
@@ -80,7 +81,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
 <!-- Doctumentation  -->
 ## Full Documentation
 
-_For more examples, please refer to the [Documentation folder](/documentation)
+Most documentation is provided via docstrings, for more examples, please refer to the [Documentation folder](/documentation)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
