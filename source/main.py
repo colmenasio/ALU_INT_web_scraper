@@ -1,9 +1,12 @@
 from WebCrawler import WebCrawler
 
 # TODO implement "https://gdacs.org/Alerts/default.aspx" api
+# TODO implement premium filter for ELPAIS
+# TODO implement button data-pagina for EITB (nr it only takes the first page of news)
+#  (tb tampoco tiene demasiada informacion igual no vale la pena)
 
-flood_list = WebCrawler.build_from_json("flood_list.json")
+crawler = WebCrawler.build_from_json("eitb.json")
 print("RUNNING")
-flood_list.auto_fill_pipeline(min_links=2)
+crawler.auto_fill_pipeline(min_links=2)
 print("DISPATCHING LINKS")
-flood_list.dispatch_links(n_of_threads_arg=1, extracting_method_arg="generic")
+crawler.dispatch_links(n_of_threads_arg=1, extracting_method_arg="generic")

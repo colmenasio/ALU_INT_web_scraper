@@ -17,16 +17,21 @@ class Disaster:
         "Earthquake": generic_parameters
     }
 
-    def __init__(self, unprocessed_data_arg: dict = None, link_arg: str = None,
-                 category_arg: str = None, data_arg: str = None):
+    def __init__(self,
+                 raw_data_arg: dict = None,
+                 link_arg: str = None,
+                 language_arg: str = None,
+                 category_arg: str = None,
+                 data_arg: str = None):
         """
         Instance constructor. All parameters default to None
 
-        :param unprocessed_data_arg: A dictionary containing 2 keys: title and body, of the New
+        :param raw_data_arg: A dictionary containing 2 keys: title and body, of the New
         :param link_arg: A string containing the link to the New
         :param category_arg
         """
-        self.raw_data = unprocessed_data_arg
+        self.raw_data = raw_data_arg
+        self.language = language_arg
         self.link = link_arg # TODO deprecated attribute, remove it
         # TODO sanitize the category input
         self.category = category_arg
@@ -35,8 +40,8 @@ class Disaster:
 
     def classify(self) -> None:
         """In-place classification of the new. Fills self->category using self->raw_data"""
-        if self.raw_data is None:
-            raise InsufficientInformation(Disaster.classify.__name__, "self.raw_data")
+        if self.raw_data is None or self.language is None:
+            raise InsufficientInformation(Disaster.classify.__name__, "self.raw_data and self.language")
         result = GptParser.classify(self.raw_data, list(Disaster.subtypes_parameters.keys()))
         if result is None:
             raise InvalidCategoryErr()
@@ -44,8 +49,10 @@ class Disaster:
 
     def extract_data(self) -> None:
         """In-place extraction of information. Fills the self->data field using self->raw_data and self->category"""
-        if self.raw_data is None or self.category is None:
-            raise InsufficientInformation(Disaster.extract_data.__name__, "self.raw_data and self.category")
+        if self.raw_data is None or self.category is None or self.language is None:
+            raise InsufficientInformation(
+                Disaster.extract_data.__name__, "self.raw_data, self.language and self.category"
+            )
         self.data = GptParser.extract_json(self.raw_data, self.subtypes_parameters[self.category])
 
     def save_to_database(self) -> None:
