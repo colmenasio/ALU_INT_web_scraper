@@ -152,6 +152,12 @@ class WebCrawler:
             return
         self.auto_fill_pipeline(next_page_link, min_links=min_links - len(hrefs))
 
+    def push_to_pipeline(self, links_arg: [str]) -> None:
+        if isinstance(links_arg, list):
+            self._add_to_pipeline(links_arg)
+        else:
+            raise ValueError(f"push_to_pipeline expected a list, got {type(links_arg)}\n")
+
     def dispatch_links(self, extracting_method_arg: str = "generic", n_of_threads_arg: int = 1,
                        status_filter_arg: str = None) -> None:
         """Processes links from the pipeline and sends extracted information to the database.
