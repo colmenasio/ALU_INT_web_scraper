@@ -43,11 +43,13 @@ class WebCrawler:
                  news_links_blacklist: [str] = None,
                  news_links_whitelist: [str] = None,
 
-                 base_next_page_link: str = "",
-                 base_news_link: str = "",
+                 next_page_root_link: str = "",
+                 news_root_link: str = "",
                  does_main_needs_selenium: bool = False,
                  do_news_needs_selenium: bool = False,
+
                  encoding: str = "UTF-8",
+                 language: str = "en",
 
                  **kwargs
                  ):
@@ -64,12 +66,13 @@ class WebCrawler:
             If None, matches all links. Defaults to None
         :param news_links_whitelist: re Regex that news links must not match to be processed.
             Defaults to None
-        :param base_next_page_link: Prefix to be added to the relative address of the next page link
-        :param base_news_link: Prefix to be added to the relative addresses of the individual news links
+        :param next_page_root_link: Prefix to be added to the relative address of the next page link
+        :param news_root_link: Prefix to be added to the relative addresses of the individual news links
         :param does_main_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
         :param do_news_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
+        :param language: Language of the website. Uses ISO 639-1 Code. Defaults to en (english).
         :param encoding: Defaults to UTF-8.
         """
         # TODO: some crawling/scraping methods will require different fields than others. Write
@@ -89,9 +92,11 @@ class WebCrawler:
         self._link_blacklist = news_links_blacklist
         self._does_main_needs_sel = does_main_needs_selenium
         self._do_news_needs_sel = do_news_needs_selenium
-        self._next_page_base_link = base_next_page_link
-        self._news_base_link = base_news_link
+        self._next_page_root_link = next_page_root_link
+        self._news_root_link = news_root_link
+
         self._encoding = encoding
+        self._language = language
 
         self._link_pipeline = Queue()  # Queue of dictionaries in the form of: {Link: "", Status: ""}
 
@@ -136,8 +141,6 @@ class WebCrawler:
         :param min_links: Lower bound on the number of links added to the pipeline until recursion ends
         """
         # TODO: implement a check so that if the collection of links reaches the first link of the last search, it stops
-        if min_links <= 0:
-            return
         if link is None:
             link = self._main_page_link
         soup = self._get_soup_from_link(link, use_selenium_arg=self._does_main_needs_sel)
@@ -147,6 +150,10 @@ class WebCrawler:
                   "Either there are not enough link in the page or a selector didnt work")
             return
         self._add_to_pipeline(hrefs)
+
+        # go to the next page if necessary
+        if min_links - len(hrefs) <= 0:
+            return
         next_page_link = self._get_next_page_link(soup)
         if next_page_link is None:
             return
@@ -203,7 +210,7 @@ class WebCrawler:
     def _format_link(self, relative_link: str, is_next_page_link_arg: bool = False) -> str:
         """Adds the base address to the relative address to get a valis address"""
         # TODO move the ["href"] out of this function
-        base_link = self._next_page_base_link if is_next_page_link_arg is True else self._news_base_link
+        base_link = self._next_page_root_link if is_next_page_link_arg is True else self._news_root_link
         return base_link + relative_link
 
     def _add_to_pipeline(self, links_arg: [str], status_arg="Not_Yet_Dispatched"):
@@ -298,7 +305,7 @@ class WebCrawler:
         except InvalidCategoryErr:
             curr_link["status"] = "Could_not_Classify_New"
         failed_links_queue_arg.put(curr_link)
-        print(f"An error occurred when trying to process a link: {curr_link}")
+        print(f"An error occurred when trying to process a link: \n{curr_link['link']}\n Error: {curr_link['status']}")
         return
 
     def _generic_new_scraping(self, link_arg: str) -> None:
@@ -320,5 +327,6 @@ class WebCrawler:
         body = soup_arg.select(self._body_selector)
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
-        return Disaster(unprocessed_data_arg={"title": parsed_title, "body": parsed_body},
-                        link_arg=link_arg)
+        return Disaster(raw_data_arg={"title": parsed_title, "body": parsed_body},
+                        link_arg=link_arg,
+                        language_arg=self._language)
