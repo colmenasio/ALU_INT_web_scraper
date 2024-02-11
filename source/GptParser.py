@@ -5,7 +5,7 @@ import openai
 
 class GptParser:
     try:
-        with open("../gpt_keys/keys.txt") as stream:
+        with open("../config/gpt_keys/keys.txt") as stream:
             # TODO this is horrible. Words cannot describe how horrible it is. i shall F I X I T
             openai_keys = list(map(lambda x: x.rstrip("\n", ), stream.readlines()))
 

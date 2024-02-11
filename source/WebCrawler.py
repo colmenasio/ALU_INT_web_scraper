@@ -28,7 +28,7 @@ class WebCrawler:
     sel_driver.implicitly_wait(time_to_wait=3)
     sel_session_lock = threading.Lock()
 
-    DEFINITIONS_PATH = "../website_definitions/definitions"
+    DEFINITIONS_PATH = "../config/website_definitions/definitions"
 
     def __init__(self,
                  web_name: str = None,
