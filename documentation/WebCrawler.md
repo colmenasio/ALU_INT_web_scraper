@@ -20,7 +20,7 @@ individial news for future processing and their status
 - `__init__()`
 - `build_from_dict(dictionary)`
 - `build_from_json(filename)` or `build_all_from_json()`: The json files, by default ,
-are expected to be found in the `"root/website_definitions/definitions"`. Check its README for more info
+are expected to be found in the `"root/config/website_definitions/definitions"`. Check its README for more info
 
 ### `auto_fill_pipeline(self, link: str = None, min_links=100) -> None:`
 The website in question is supposed to have a main article page, in which links 
