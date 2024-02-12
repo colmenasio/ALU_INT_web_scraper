@@ -1,0 +1,1 @@
+Here should go the selectors and whitelists for the website in json format
