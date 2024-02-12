@@ -5,7 +5,7 @@ from WebCrawler import WebCrawler
 # TODO implement button data-pagina for EITB (nr it only takes the first page of news)
 #  (tb tampoco tiene demasiada informacion igual no vale la pena)
 
-crawler = WebCrawler.build_from_json("floodlist.json")
+crawler = WebCrawler.build_from_json("flood_list.json")
 print("RUNNING")
 crawler.auto_fill_pipeline(min_links=100)
 print("DISPATCHING LINKS")
