@@ -57,6 +57,7 @@ class GptParser:
         :param search_parameters_arg: A list of parameters to fulfill. Eg; ("date", "number_of_deaths"...).
         :returns: Either a string formatted in json, or None in case of fatal error."""
         # TODO make the prompt better and E N S U R E it outputs correct json
+        # TODO change date format to ISO 8601
         parser_client = openai.OpenAI(api_key=GptParser.openai_keys[0], organization=GptParser.openai_keys[1])
         response = parser_client.chat.completions.create(
             model="gpt-3.5-turbo",

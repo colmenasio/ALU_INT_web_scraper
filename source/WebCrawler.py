@@ -45,8 +45,8 @@ class WebCrawler:
 
                  next_page_root_link: str = "",
                  news_root_link: str = "",
-                 does_main_needs_selenium: bool = False,
-                 do_news_needs_selenium: bool = False,
+                 main_needs_selenium: bool = False,
+                 news_needs_selenium: bool = False,
 
                  encoding: str = "UTF-8",
                  language: str = "en",
@@ -68,9 +68,9 @@ class WebCrawler:
             Defaults to None
         :param next_page_root_link: Prefix to be added to the relative address of the next page link
         :param news_root_link: Prefix to be added to the relative addresses of the individual news links
-        :param does_main_needs_selenium: Bool indicating if selenium is needed in the main pages
+        :param main_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
-        :param do_news_needs_selenium: Bool indicating if selenium is needed in the main pages
+        :param news_needs_selenium: Bool indicating if selenium is needed in the main pages
             (if server response is required)
         :param language: Language of the website. Uses ISO 639-1 Code. Defaults to en (english).
         :param encoding: Defaults to UTF-8.
@@ -90,8 +90,8 @@ class WebCrawler:
 
         self._link_whitelist = news_links_whitelist
         self._link_blacklist = news_links_blacklist
-        self._does_main_needs_sel = does_main_needs_selenium
-        self._do_news_needs_sel = do_news_needs_selenium
+        self._main_needs_sel = main_needs_selenium
+        self._news_needs_sel = news_needs_selenium
         self._next_page_root_link = next_page_root_link
         self._news_root_link = news_root_link
 
@@ -143,7 +143,7 @@ class WebCrawler:
         # TODO: implement a check so that if the collection of links reaches the first link of the last search, it stops
         if link is None:
             link = self._main_page_link
-        soup = self._get_soup_from_link(link, use_selenium_arg=self._does_main_needs_sel)
+        soup = self._get_soup_from_link(link, use_selenium_arg=self._main_needs_sel)
         hrefs = self._get_hrefs(soup)
         if hrefs is None:
             print("auto_fill_pipeline stopped prematurely. "
@@ -323,6 +323,7 @@ class WebCrawler:
     def _build_unparsed_disaster(self, soup_arg: BeautifulSoup, link_arg: str) -> Disaster:
         """Disaster instance builder. The returned Disaster type will only have
         the raw_data and link attributes initialized"""
+        # TODO add error catching and debug info
         title = soup_arg.select_one(self._title_selector)
         body = soup_arg.select(self._body_selector)
         parsed_title = re.sub(r'\s+', ' ', title.text)
