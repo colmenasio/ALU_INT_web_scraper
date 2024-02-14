@@ -1,3 +1,4 @@
+from source.Categories import Categories
 from source.CustomExceptions import InsufficientInformation, InvalidCategoryErr
 from source.GptParser import GptParser
 
@@ -8,14 +9,7 @@ class Disaster:
     The idea is to initialize a Disaster instance with some attributes unspecified, and then use the provided methods to
     fill the remaining ones until the instance is ready to be sent to the database"""
 
-    generic_parameters = ("Number of lethal victims (int)", "Number of affected people (int)",
-                          "Date of the disaster (date)", "Region (str)")
-    subtypes_parameters = {
-        "Flood": generic_parameters,
-        "Drought": generic_parameters,
-        "Disease": ("Number of lethal victims (int)", "Region (str)", "Name of the disease (str)"),
-        "Earthquake": generic_parameters
-    }
+    categories = Categories.build_from_json()
 
     def __init__(self,
                  raw_data_arg: dict = None,
@@ -32,7 +26,7 @@ class Disaster:
         """
         self.raw_data = raw_data_arg
         self.language = language_arg
-        self.link = link_arg # TODO deprecated attribute, remove it
+        self.link = link_arg  # TODO deprecated attribute, remove it
         # TODO sanitize the category input
         self.category = category_arg
         # TODO sanitize the data input
@@ -42,7 +36,7 @@ class Disaster:
         """In-place classification of the new. Fills self->category using self->raw_data"""
         if self.raw_data is None or self.language is None:
             raise InsufficientInformation(Disaster.classify.__name__, "self.raw_data and self.language")
-        result = GptParser.classify(self.raw_data, list(Disaster.subtypes_parameters.keys()))
+        result = GptParser.classify(self.raw_data, list(self.categories.get_categories()))
         if result is None:
             raise InvalidCategoryErr()
         self.category = result
@@ -53,7 +47,7 @@ class Disaster:
             raise InsufficientInformation(
                 Disaster.extract_data.__name__, "self.raw_data, self.language and self.category"
             )
-        self.data = GptParser.extract_json(self.raw_data, self.subtypes_parameters[self.category])
+        self.data = GptParser.answer_questions(self.raw_data, self.categories.get_questions_for(self.category))
 
     def save_to_database(self) -> None:
         """Requires self->category and self->data to be specified"""
@@ -67,4 +61,4 @@ class Disaster:
     def __str__(self):
         print(f"Object: {self.__repr__()}\n"
               f"Unparsed Data: {self.raw_data}"
-              f"Link: {self.link}")
+              f"Link: {self.link}\n")
