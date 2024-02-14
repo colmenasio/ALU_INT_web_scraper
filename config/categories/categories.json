@@ -1,0 +1,85 @@
+{
+  "Flood": [
+    {
+      "parameter_name": "Lethal victims",
+      "question": "How many people died?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Non-Lethal victims",
+      "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Disaster Date",
+      "question": "What's the date the disaster took place in?",
+      "format": "date"
+    },
+    {
+      "parameter_name": "Region",
+      "question": "Where did the disaster take place in?",
+      "format": "str"
+    }
+  ],
+  "Drought": [
+    {
+      "parameter_name": "Lethal victims",
+      "question": "How many people died?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Non-Lethal victims",
+      "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Disaster Date",
+      "question": "What's the date the disaster took place in?",
+      "format": "date"
+    },
+    {
+      "parameter_name": "Region",
+      "question": "Where did the disaster take place in?",
+      "format": "str"
+    }
+  ],
+  "Disease": [
+    {
+      "parameter_name": "Lethal victims",
+      "question": "How many people died?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Region",
+      "question": "Where did the pandemic take place in?",
+      "format": "str"
+    },
+    {
+      "parameter_name": "Disease name",
+      "question": "What is the name of the disease the article talks about?",
+      "format": "str"
+    }
+  ],
+  "Earthquake": [
+    {
+      "parameter_name": "Lethal victims",
+      "question": "How many people died?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Non-Lethal victims",
+      "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
+      "format": "int"
+    },
+    {
+      "parameter_name": "Disaster Date",
+      "question": "What's the date the disaster took place in?",
+      "format": "date"
+    },
+    {
+      "parameter_name": "Region",
+      "question": "Where did the disaster take place in?",
+      "format": "str"
+    }
+  ]
+}
