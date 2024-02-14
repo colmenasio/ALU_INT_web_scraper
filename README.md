@@ -33,7 +33,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
     - The method  `auto_fill_pipeline` crawls through the main pages of the news site, scraping news links according to the filters specified when creating the Website instance
       ```py
       # Example
-      generic_web.auto_fill_pipeline(min_links=10)
+      generic_web.auto_fill_pipeline(min_links_arg=10)
       ```
       And so, the pipeline of links is full.
 
