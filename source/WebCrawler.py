@@ -130,7 +130,7 @@ class WebCrawler:
         definitions = listdir(WebCrawler.DEFINITIONS_PATH)
         return [WebCrawler.build_from_json(file_name) for file_name in definitions if file_name.endswith(".json")]
 
-    def auto_fill_pipeline(self, link: str = None, min_links=100) -> None:
+    def auto_fill_pipeline(self, link: str = None, min_links_arg=100) -> None:
         """Recursive crawler function. Extracts individual news links from the main page specified by main_page_link.
 
         Calls itself on the next page until the max_links have been reached. The links obtained will be added to the
@@ -138,7 +138,7 @@ class WebCrawler:
 
         :param link: Recursion parameter indicating the page to crawl. Defaults to None, in which case crawls the
             page specified by self->main_page_link
-        :param min_links: Lower bound on the number of links added to the pipeline until recursion ends
+        :param min_links_arg: Lower bound on the number of links added to the pipeline until recursion ends
         """
         # TODO: implement a check so that if the collection of links reaches the first link of the last search, it stops
         if link is None:
@@ -152,12 +152,12 @@ class WebCrawler:
         self._add_to_pipeline(hrefs)
 
         # go to the next page if necessary
-        if min_links - len(hrefs) <= 0:
+        if min_links_arg - len(hrefs) <= 0:
             return
         next_page_link = self._get_next_page_link(soup)
         if next_page_link is None:
             return
-        self.auto_fill_pipeline(next_page_link, min_links=min_links - len(hrefs))
+        self.auto_fill_pipeline(next_page_link, min_links_arg=min_links_arg - len(hrefs))
 
     def push_to_pipeline(self, links_arg: [str]) -> None:
         if isinstance(links_arg, list):
