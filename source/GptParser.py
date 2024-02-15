@@ -190,3 +190,5 @@ class GptParser:
             return answer
         if result_format == "date":
             return answer
+        raise ValueError(f"GptParser tried casting its answer to {result_format}, "
+                         "which is a type for which answer casting is not yet implemented")
