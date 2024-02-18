@@ -120,9 +120,13 @@ class WebCrawler:
         :param file_name_arg: eg: 'web1.json'
         """
         # TODO add error handling
-        with open(WebCrawler.DEFINITIONS_PATH+"/"+file_name_arg) as fstream:
-            parsed_json = json.load(fstream)
-        return WebCrawler.build_from_dict(parsed_json)
+        path = WebCrawler.DEFINITIONS_PATH+"/"+file_name_arg
+        try:
+            with open(path) as fstream:
+                parsed_json = json.load(fstream)
+            return WebCrawler.build_from_dict(parsed_json)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Tried opening {path}, file not found\n")
 
     @staticmethod
     def build_all_from_json() -> [WebCrawler]:

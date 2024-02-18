@@ -7,6 +7,6 @@ from WebCrawler import WebCrawler
 
 crawler = WebCrawler.build_from_json("flood_list.json")
 print("RUNNING")
-crawler.auto_fill_pipeline(min_links=100)
+crawler.auto_fill_pipeline(min_links_arg=1)
 print("DISPATCHING LINKS")
 crawler.dispatch_links(n_of_threads_arg=1, extracting_method_arg="generic")
