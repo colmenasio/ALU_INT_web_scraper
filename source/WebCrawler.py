@@ -304,7 +304,7 @@ class WebCrawler:
             return
         except ConnectionError:
             curr_link["status"] = "Connection_Error"
-        except TypeError or AttributeError:
+        except (TypeError, AttributeError):
             curr_link["status"] = "General_Parsing_Error"
         except InvalidCategoryErr:
             curr_link["status"] = "Could_not_Classify_New"

@@ -90,21 +90,23 @@ class GptParser:
                       "caused the death of dozens of persons and the displacement of 100 people.\n\n" \
                       "-Question: How many people died?\n" \
                       "-Format: integer\n" \
-                      "In this case, your answer should be: '12'\n\n" \
-                      "News Article: " \
+                      "In this case, your answer should be '12'\n\n" \
+                      "Here is another example:\n" \
+                      "-News Article: " \
                       "*Earthquake hits tokyo*\n" \
                       "This week a horrible earthquake of magnitude 5 hit the city of tokyo, causing estimated " \
                       "damages of over 1 Million dollars\n\n" \
-                      "Question: What are the estimated damages in dollars?\n" \
-                      "Format: integer\n" \
+                      "-Question: What are the estimated damages in dollars?\n" \
+                      "-Format: integer\n" \
                       "In this case, your answer should be: '1000000'\n\n" \
-                      "News Article: " \
+                      "Here is a third example:\n" \
+                      "-News Article: " \
                       "*Plague of malaria hits nigeria*\n" \
                       "The numbers of cases of malaria detected over the last few weeks in nigeria has rising in an" \
                       "unexpected fashion. Over a thousand cases were detected, " \
                       "already 100 lethal victims are confirmed \n\n" \
-                      "Question: How many people were infected?\n" \
-                      "Format: integer\n" \
+                      "-Question: How many people were infected?\n" \
+                      "-Format: integer\n" \
                       "In this case, your answer should be: '1000'\n\n"
         results = dict()
         for question in questions_arg:
