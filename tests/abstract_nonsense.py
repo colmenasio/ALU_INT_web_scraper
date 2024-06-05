@@ -3,8 +3,9 @@ from source.Disaster import Categories
 
 
 def abstract_nonsense_1():
-    a = Categories.build_from_json()
-    print(a._questions)
+    foo = "dapmdamd"
+    text = f"{foo}, {{adm}}"
+    print(text)
 
 
 if __name__ == "__main__":
