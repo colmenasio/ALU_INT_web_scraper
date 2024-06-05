@@ -42,7 +42,8 @@ class mySQL_api:
 
     def create_credentials(self):
         host = input("host (default 'localhost'): ")
-        if len(host) == 0: host = "localhost"
+        if len(host) == 0:
+            host = "localhost"
         user = input("user: ")
         password = input("password: ")
         with open(self.CREDENTIALS_FILENAME, "w") as fstream:
@@ -50,28 +51,35 @@ class mySQL_api:
         print(f"'{self.CREDENTIALS_FILENAME}' created")
 
 
-def check_if_already_existing(session, db_name):
-    pass
+def check_if_already_existing(session_arg, db_name_arg: str) -> None:
+    mycursor = session_arg.cursor()
+    mycursor.execute("SHOW DATABASES")
+    if db_name_arg in [x[0] for x in mycursor]:
+        print(f"Database named {db_name_arg} already exists.")
+        print("ERASE it and proceed with setup, or cancel operation")
+        if input("ERASE(Y/N)").lower() == "y" and input("All data will be lost. Continue? (Y/N)").lower() == "y":
+            mycursor.execute(f"DROP DATABASE {db_name_arg}")
+            print(f"Old {db_name_arg} dropped. Continuing...")
+        else:
+            print("Operation Cancelled")
+            exit()
 
 
-def create_database(session, db_name):
-    pass
+def create_database(session_arg, db_name_arg: str) -> None:
+    mycursor = session_arg.cursor()
+    mycursor.execute(f"CREATE DATABASE {db_name_arg}")
+    print(f"Database named {db_name_arg} created correctly")
 
 
-def get_cursor(session, db_name):
-    pass
-
-
-def create_tables(cursor):
-    pass
+def create_tables(session_arg, db_name_arg: str) -> None:
+    raise NotImplementedError
 
 
 if __name__ == "__main__":
     with mySQL_api() as session:
         # TODO add database name input prompt
         # TODO add logs and prints and stuff
-        db_name = "web-scraper-test"
+        db_name = "test_web_scraper"
         check_if_already_existing(session, db_name)
         create_database(session, db_name)
-        cursor = get_cursor(session, db_name)
-        create_tables(cursor)
+        create_tables(session, db_name)
