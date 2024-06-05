@@ -327,7 +327,7 @@ class WebCrawler:
     def _build_unparsed_disaster(self, soup_arg: BeautifulSoup, link_arg: str) -> Disaster:
         """Disaster instance builder. The returned Disaster type will only have
         the raw_data and link attributes initialized"""
-        # TODO add error catching and debug info
+        # TODO add debug info to execptions
         title = soup_arg.select_one(self._title_selector)
         body = soup_arg.select(self._body_selector)
         parsed_title = re.sub(r'\s+', ' ', title.text)
