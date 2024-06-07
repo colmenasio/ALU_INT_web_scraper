@@ -20,6 +20,17 @@ class mySQL_api:
         self.curr_session.close()
 
     def do_login(self):
+        credentials = self.get_credentials()
+        try:
+            return mysql.connector.connect(**credentials)
+        except mysql.connector.errors.ProgrammingError:
+            print("Runtime Error: Credentials invalid. Wrong host, username or password. Edit them?")
+            if input("(Y/N)").lower() == "y":
+                self.create_credentials()
+                print("Re-run the script to retry login")
+            exit()
+
+    def get_credentials(self) -> dict:
         credentials_exist = os.path.isfile(self.CREDENTIALS_FILENAME)
         if not credentials_exist:
             print(f"Runtime Error: '{self.CREDENTIALS_FILENAME}' not found in the directory. Create it?")
@@ -31,14 +42,7 @@ class mySQL_api:
         if not are_credentials_valid:
             print("Runtime Error: Credentials are not valid (Ensure the host, user and password fields are defined)")
             exit()
-        try:
-            return mysql.connector.connect(**credentials)
-        except mysql.connector.errors.ProgrammingError:
-            print("Runtime Error: Credentials invalid. Wrong host, username or password. Edit them?")
-            if input("(Y/N)").lower() == "y":
-                self.create_credentials()
-                print("Re-run the script to retry login")
-            exit()
+        return credentials
 
     def create_credentials(self):
         host = input("host (default 'localhost'): ")
