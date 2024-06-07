@@ -3,7 +3,7 @@
 # Disaster Information Web Scraper
 Web Scraper, built in Python using [`BeautifulSoup`](https://pypi.org/project/beautifulsoup4/) for html parsing and [`openAI`](https://openai.com/) for information extraction.
 Despite being originaly built for disaster news websites, can be easily tweaked to work with any type of news website
-
+Includes implementation of MySQL as a database solution for the scraped data 
 
 This proyect was done as a "alumno interno" task (plz change this line asap...)
 
