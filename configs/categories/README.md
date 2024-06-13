@@ -17,3 +17,6 @@ Note: rn the only implemented formats are strings (str), integers (int), and dat
 
 ## Examples
 For examples check the presets in `categories.json`
+
+# IMPORTANT
+For database integration purposes, the parameter names must only consist on alphabetic charactes, whitespaces or underscores (`_`)
