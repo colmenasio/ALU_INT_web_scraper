@@ -6,7 +6,7 @@
       "format": "int"
     },
     {
-      "parameter_name": "Non-Lethal victims",
+      "parameter_name": "Non_Lethal victims",
       "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
       "format": "int"
     },
@@ -28,7 +28,7 @@
       "format": "int"
     },
     {
-      "parameter_name": "Non-Lethal victims",
+      "parameter_name": "Non_Lethal victims",
       "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
       "format": "int"
     },
@@ -67,7 +67,7 @@
       "format": "int"
     },
     {
-      "parameter_name": "Non-Lethal victims",
+      "parameter_name": "Non_Lethal victims",
       "question": "How many people were displaced, evacuated, or affected in a non-lethal way?",
       "format": "int"
     },

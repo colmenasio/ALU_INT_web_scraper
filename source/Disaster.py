@@ -1,6 +1,7 @@
 from source.Categories import Categories
 from source.CustomExceptions import InsufficientInformation, InvalidCategoryErr
 from source.GptParser import GptParser
+from source.database_integration.MySQL import MySQL
 
 
 class Disaster:
@@ -10,6 +11,8 @@ class Disaster:
     fill the remaining ones until the instance is ready to be sent to the database"""
 
     categories = Categories.build_from_json()
+    database = MySQL()
+    # TODO Since eventually the database will change, make the selection of the db used a command prompt or a config idc
 
     def __init__(self,
                  raw_data_arg: dict = None,
@@ -26,7 +29,7 @@ class Disaster:
         """
         self.raw_data = raw_data_arg
         self.language = language_arg
-        self.link = link_arg  # TODO deprecated attribute, remove it
+        self.link = link_arg
         # TODO sanitize the category input
         self.category = category_arg
         # TODO sanitize the data input
@@ -53,10 +56,7 @@ class Disaster:
         """Requires self->category and self->data to be specified"""
         if self.category is None or self.data is None:
             raise InsufficientInformation(Disaster.save_to_database.__name__, "self.category and self.data")
-        print(f"suppose we send {self.__repr__()} to db\n"
-              f"Rawdata: {self.raw_data}\n"
-              f"Disaster type: {self.category}\n"
-              f"Disaster data: {self.data}")
+        self.database.save_to_database(self)
 
     def __str__(self):
         print(f"Object: {self.__repr__()}\n"

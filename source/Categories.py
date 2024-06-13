@@ -5,7 +5,7 @@ from json import load
 
 class Categories:
     """Wrapper over the categories.json to be sent to the openai API"""
-    CATEGORIES_PATH = "../config/categories/categories.json"
+    CATEGORIES_PATH = "../configs/categories/categories.json"
 
     def __init__(self, questions_arg: dict):
         self._questions = questions_arg

@@ -6,7 +6,7 @@ import json
 class mySQL_api:
     """Wrapper class whose purpose is mostly to implement
     the __exit__ method in case shit hits the fan (cause it will)"""
-    CREDENTIALS_FILENAME = "credentials.json"
+    CREDENTIALS_FILENAME = "../../configs/mysql_credentials/credentials.json"
 
     def __init__(self):
         self.curr_session = self.do_login()
@@ -75,10 +75,6 @@ def create_database(session_arg, db_name_arg: str) -> None:
     print(f"Database named {db_name_arg} created correctly")
 
 
-def create_tables(session_arg, db_name_arg: str) -> None:
-    raise NotImplementedError
-
-
 if __name__ == "__main__":
     with mySQL_api() as session:
         # TODO add database name input prompt
@@ -86,4 +82,3 @@ if __name__ == "__main__":
         db_name = "test_web_scraper"
         check_if_already_existing(session, db_name)
         create_database(session, db_name)
-        create_tables(session, db_name)

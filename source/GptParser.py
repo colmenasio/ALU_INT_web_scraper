@@ -7,7 +7,7 @@ import openai
 
 class GptParser:
     try:
-        with open("../config/gpt_keys/keys.json") as fstream:
+        with open("../configs/gpt_keys/keys.json") as fstream:
             keys_json = load(fstream)
             if keys_json.get("key") is None:
                 raise IOError("keys.json does not have a 'key' field")
