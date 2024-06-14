@@ -138,15 +138,11 @@ class MySQL(AbsDatabase):
     def _create_disasters_tables(self) -> None:
         """Creates a table from each type of disaster defined in the categories."""
         with open(self.CATEGORIES_FILEPATH) as fstream:
-            disaster_types = json.load(fstream)
-        keys = list(disaster_types.keys())
-        for key in keys:
-            query = f"CREATE TABLE {key} ("
-            for column in disaster_types[key]:
-                query += self._format_disaster_column(column)
-                query += ", "
-            query = query.removesuffix(", ")
-            query += ")"
+            categories_data = json.load(fstream)
+        disaster_types = list(categories_data.keys())
+        for dis_type in disaster_types:
+            columns = ", ".join([self._format_disaster_column(column) for column in categories_data[dis_type]])
+            query = f"CREATE TABLE {dis_type} (Disaster_ID INT AUTO_INCREMENT PRIMARY KEY, {columns})"
             self.cursor.execute(query)
 
     @staticmethod
