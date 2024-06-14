@@ -39,6 +39,7 @@ class MySQL(AbsDatabase):
             query = "SELECT LAST_INSERT_ID()"
             self.cursor.execute(query)
             last_rawnew_id = self.cursor.fetchone()[0]
+            self.session.commit()
             print(f"Succesfully stored {disaster_instance_arg.category} instance "
                   f"(Disaster_ID: {last_disaster_id}, RawNews_ID: {last_rawnew_id})")
         except mysql.connector.ProgrammingError as e:
@@ -101,6 +102,7 @@ class MySQL(AbsDatabase):
             self._create_main_table()
             self._create_news_portals_table()
             self._create_disasters_tables()
+            self.session.commit()
             print(f"Database named {self.DATABASE_NAME} created correctly")
         except mysql.connector.ProgrammingError as e:
             print(f"Process of creating the database named: {self.DATABASE_NAME} failed.")
