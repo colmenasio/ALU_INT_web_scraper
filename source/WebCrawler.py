@@ -29,6 +29,7 @@ class WebCrawler:
     sel_session_lock = threading.Lock()
 
     DEFINITIONS_PATH = "../configs/website_definitions/definitions"
+    SHOW_EXCEPTIONS = False
 
     def __init__(self,
                  web_name: str = None,
@@ -247,6 +248,7 @@ class WebCrawler:
 
         First, the tag in which the links are grouped is fetched.
         Then, the individual links are collected"""
+        # print(soup_arg.prettify())
         main_section = soup_arg.select_one(self._news_wapper_selector)
         if main_section is None:
             raise ValueError("Invalid news_wapper_selector")
@@ -295,6 +297,7 @@ class WebCrawler:
 
         :except queue.Empty: When self->link_pipeline is finally empty
         """
+        global e
         curr_link = self._link_pipeline.get(block=False)
         if status_filter_arg is not None and curr_link["status"] != status_filter_arg:
             failed_links_queue_arg.put(curr_link)
@@ -302,12 +305,18 @@ class WebCrawler:
         try:
             parsing_method_arg(self, curr_link["link"])
             return
-        except ConnectionError:
+        except ConnectionError as e:
             curr_link["status"] = "Connection_Error"
-        except (TypeError, AttributeError):
+            if self.SHOW_EXCEPTIONS:
+                print(e)
+        except (TypeError, AttributeError) as e:
             curr_link["status"] = "General_Parsing_Error"
-        except InvalidCategoryErr:
+            if self.SHOW_EXCEPTIONS:
+                print(e)
+        except InvalidCategoryErr as e:
             curr_link["status"] = "Could_not_Classify_New"
+            if self.SHOW_EXCEPTIONS:
+                print(e)
         failed_links_queue_arg.put(curr_link)
         print(f"An error occurred when trying to process a link: \n{curr_link['link']}\n Error: {curr_link['status']}")
         return
