@@ -1,5 +1,5 @@
 from source.database_integration.AbsDatabase import AbsDatabase
-import os.path
+from os import path, listdir
 import mysql.connector
 import json
 
@@ -15,7 +15,7 @@ class MySQL(AbsDatabase):
     def __init__(self):
         print("\n-----------------------------------------------\n"
               "MySQL was selected as the destination of the data.\n"
-              f"Data will be stored in the database named '{self.DATABASE_NAME}'")
+              f"The database that will be used is '{self.DATABASE_NAME}'")
         # TODO add options to change the database selected
         if input("Proceed? (Y/N) ").lower() != "y":
             exit()
@@ -38,7 +38,7 @@ class MySQL(AbsDatabase):
             exit()
 
     def get_credentials(self) -> dict:
-        credentials_exist = os.path.isfile(self.CREDENTIALS_FILEPATH)
+        credentials_exist = path.isfile(self.CREDENTIALS_FILEPATH)
         if not credentials_exist:
             print(f"Credentials not found in '{self.CREDENTIALS_FILEPATH}'. Create it?")
             if input("(Y/N)").lower() == "y":
@@ -64,8 +64,8 @@ class MySQL(AbsDatabase):
     def check_if_db_exists(self) -> None:
         self.cursor.execute("SHOW DATABASES")
         if self.DATABASE_NAME not in [x[0] for x in self.cursor]:
-            print(f"Database named {self.DATABASE_NAME} does not exist.")
-            if input("Create It (Y/N)").lower() == "y":
+            print(f"Database named '{self.DATABASE_NAME}' does not exist.")
+            if input("Create It (Y/N) ").lower() == "y":
                 self.create_database()
         self.cursor.execute(f"USE {self.DATABASE_NAME}")
 
@@ -105,12 +105,36 @@ class MySQL(AbsDatabase):
         """Creates the main table of the database"""
         self.cursor.execute("CREATE TABLE NewsPortals ("
                             "NewsPortals_ID INT AUTO_INCREMENT PRIMARY KEY, "
-                            "Name VARCHAR(30) NOT NULL, "
+                            "Name VARCHAR(50) NOT NULL, "
                             "MainURL VARCHAR(255) NOT NULL, "
-                            "NewTitle VARCHAR(255) NOT NULL, "
                             "Language CHAR(2) NOT NULL"
                             ")")
-        # TODO fill the information about the news portals xdddd
+        definitions = listdir(self.WEBSITE_DEFINITIONS_FILEPATH)
+        website_def_filenames = [file_name for file_name in definitions if file_name.endswith(".json")]
+        print("The metadata of the following websites will be loaded into the database:")
+        print([web_name.removesuffix(".json") for web_name in website_def_filenames])
+        for website_def in website_def_filenames:
+            with open(f"{self.WEBSITE_DEFINITIONS_FILEPATH}/{website_def}") as fstream:
+                website_configs = json.load(fstream)
+            try:
+                # TODO sanitize stuff just in case idk
+                web_name = website_configs["web_name"]
+                web_main_url = website_configs["main_page_link"]
+                web_language = website_configs["language"]
+            except KeyError:
+                print(f"Error loading metadata from '{website_def}'")
+                continue
+            query = "INSERT INTO NewsPortals (Name, MainURL, Language) " \
+                    f"VALUES ('{web_name}', '{web_main_url}', '{web_language}')"
+            try:
+                self.cursor.execute(query)
+            except mysql.connector.ProgrammingError as e:
+                print(f"Error inserting metadata from '{website_def}' into database.\n"
+                      f"The following query caused the error: {query}")
+            except mysql.connector.DataError as e:
+                print(f"Data in '{website_def}' is not valid\n"
+                      f"The following query caused the error: {query}")
+                print(e)
 
     def _create_disasters_tables(self) -> None:
         """Creates a table from each type of disaster defined in the categories."""
