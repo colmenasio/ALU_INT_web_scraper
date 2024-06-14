@@ -12,6 +12,8 @@ class MySQL(AbsDatabase):
     CATEGORIES_FILEPATH = "../configs/categories/categories.json"
     WEBSITE_DEFINITIONS_FILEPATH = "../configs/website_definitions/definitions"
 
+    SHOW_EXCEPTIONS = True
+
     def __init__(self):
         print("\n-----------------------------------------------\n"
               "MySQL was selected as the destination of the data.\n"
@@ -33,9 +35,18 @@ class MySQL(AbsDatabase):
             self.cursor.execute(query)
             last_disaster_id = self.cursor.fetchone()[0]
             query = self._generate_rawnew_insertion_query(disaster_instance_arg, last_disaster_id)
+            self.cursor.execute(query)
+            query = "SELECT LAST_INSERT_ID()"
+            self.cursor.execute(query)
+            last_rawnew_id = self.cursor.fetchone()[0]
+            print(f"Succesfully stored {disaster_instance_arg.category} instance "
+                  f"(Disaster_ID: {last_disaster_id}, RawNews_ID: {last_rawnew_id})")
         except mysql.connector.ProgrammingError as e:
             print("An invalid query was sent to the server:")
             print(f"Query: {query}")
+            if self.SHOW_EXCEPTIONS:
+                print(e)
+
 
     def _do_login(self):
         credentials = self._get_credentials()
@@ -173,8 +184,10 @@ class MySQL(AbsDatabase):
     @staticmethod
     def _generate_disaster_insertion_query(disaster_instance_arg) -> str:
         # TODO add sanitization and stuff
-        column_names = str(list(disaster_instance_arg.data.keys())).strip("[]")
-        values = str(list(disaster_instance_arg.data.values())).strip("[]")
+        raw_column_names = list(disaster_instance_arg.data.keys())
+        column_names = MySQL._stringify_column_names(raw_column_names)
+        values_raw = list(disaster_instance_arg.data.values())
+        values = MySQL._stringify_values(values_raw)
         query = f"INSERT INTO {disaster_instance_arg.category} ({column_names}) VALUES ({values})"
         return query
 
@@ -182,12 +195,33 @@ class MySQL(AbsDatabase):
     def _generate_rawnew_insertion_query(disaster_instance_arg, disaster_key: int) -> str:
         # TODO add sanitization and stuff
         column_names = "NewsPortal_ID, DisasterType, Disaster_ID, NewURL, NewTitle, NewBody"
-        values = f"{disaster_instance_arg.news_portal}, " \
-                 f"{disaster_instance_arg.category} ," \
-                 f"{disaster_key} ," \
-                 f"{disaster_instance_arg.link} ," \
-                 f"{disaster_instance_arg.raw_data['title']} ," \
-                 f"{disaster_instance_arg.raw_data['body']}"
+        values_raw = [disaster_instance_arg.news_portal,
+                      disaster_instance_arg.category,
+                      disaster_key,
+                      disaster_instance_arg.link,
+                      disaster_instance_arg.raw_data['title'],
+                      disaster_instance_arg.raw_data['body']]
+        values = MySQL._stringify_values(values_raw)
+
         query = f"INSERT INTO RawNews ({column_names}) VALUES ({values})"
         return query
 
+    @staticmethod
+    def _stringify_column_names(column_names_arg):
+        """Given a list of values, returns a string formatted for an SQL query.
+                Eg: ['Field With Spaces', "ID"] -> Field_With_Spaces, ID"""
+        return ", ".join([column_name.replace(" ", "_") for column_name in column_names_arg])
+
+    @staticmethod
+    def _stringify_values(values_arg: list) -> str:
+        """Given a list of values, returns a string formatted for an SQL query.
+        Eg: ['data1', 1, None] -> 'data1, 1, Null'"""
+        def parse(value) -> str:
+            if value is None:
+                return "NULL"
+            if isinstance(value, str):
+                sanitized_text = value.replace("'", "''")
+                return f"'{sanitized_text}'"
+            else:
+                return str(value)
+        return ", ".join([parse(value) for value in values_arg])
