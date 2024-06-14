@@ -10,3 +10,6 @@
 wrapper class to handle the getting data from the website definitions.
 - Restructure the disaster class and the handling of the database connection so that propper
 context management can be implemented rigth now its just a ticking bomb :3
+- Tell Matheus about the Floodlist Firewall `Sucuri WebSite Firewall - Access Denied`
+- Maybe switch to parametrized queries to avoid edge cases....
+- Add more error handling and debug tools to MySQL for gods sake AAAAAAA
