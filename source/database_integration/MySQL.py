@@ -19,30 +19,30 @@ class MySQL(AbsDatabase):
         # TODO add options to change the database selected
         if input("Proceed? (Y/N) ").lower() != "y":
             exit()
-        self.session = self.do_login()
+        self.session = self._do_login()
         self.cursor = self.session.cursor()
-        self.check_if_db_exists()
+        self._check_if_db_exists()
 
     def save_to_database(self, disaster_instance_arg) -> None:
         raise NotImplementedError
 
-    def do_login(self):
-        credentials = self.get_credentials()
+    def _do_login(self):
+        credentials = self._get_credentials()
         try:
             return mysql.connector.connect(**credentials)
         except mysql.connector.errors.ProgrammingError:
             print("Credentials invalid. Wrong host, username or password. Edit them?")
             if input("(Y/N)").lower() == "y":
-                self.create_credentials()
+                self._create_credentials()
                 print("Re-run the script to retry login")
             exit()
 
-    def get_credentials(self) -> dict:
+    def _get_credentials(self) -> dict:
         credentials_exist = path.isfile(self.CREDENTIALS_FILEPATH)
         if not credentials_exist:
             print(f"Credentials not found in '{self.CREDENTIALS_FILEPATH}'. Create it?")
             if input("(Y/N)").lower() == "y":
-                self.create_credentials()
+                self._create_credentials()
         with open(self.CREDENTIALS_FILEPATH) as fstream:
             credentials = json.load(fstream)
         are_credentials_valid = all([credential in credentials.keys() for credential in ["host", "user", "password"]])
@@ -51,7 +51,7 @@ class MySQL(AbsDatabase):
             exit()
         return credentials
 
-    def create_credentials(self):
+    def _create_credentials(self):
         host = input("host (default 'localhost'): ")
         if len(host) == 0:
             host = "localhost"
@@ -61,15 +61,15 @@ class MySQL(AbsDatabase):
             fstream.write(f'{{"host": "{host}", "user": "{user}", "password": "{password}"}}')
         print(f"'{self.CREDENTIALS_FILEPATH}' created")
 
-    def check_if_db_exists(self) -> None:
+    def _check_if_db_exists(self) -> None:
         self.cursor.execute("SHOW DATABASES")
         if self.DATABASE_NAME not in [x[0] for x in self.cursor]:
             print(f"Database named '{self.DATABASE_NAME}' does not exist.")
             if input("Create It (Y/N) ").lower() == "y":
-                self.create_database()
+                self._create_database()
         self.cursor.execute(f"USE {self.DATABASE_NAME}")
 
-    def create_database(self) -> None:
+    def _create_database(self) -> None:
         # TODO make it so that if the creation process excepts, the half-finished database is dropped
         self.cursor.execute(f"CREATE DATABASE {self.DATABASE_NAME}")
         try:
@@ -90,7 +90,7 @@ class MySQL(AbsDatabase):
             disaster_types = str(list(json.load(fstream).keys())).strip("[]")
         self.cursor.execute("CREATE TABLE RawNews ("
                             "RawNews_ID INT AUTO_INCREMENT PRIMARY KEY, "
-                            "NewsPortal_ID INT NOT NULL, "
+                            "NewsPortal_ID VARCHAR(50) NOT NULL, "
                             f"DisasterType ENUM({disaster_types}) NOT NULL, "
                             "Disaster_ID INT NOT NULL, "
                             "NewURL VARCHAR(255) NOT NULL, "
@@ -104,8 +104,7 @@ class MySQL(AbsDatabase):
         """Creates the table holding information of the news portals from data in the website_definitions"""
         """Creates the main table of the database"""
         self.cursor.execute("CREATE TABLE NewsPortals ("
-                            "NewsPortals_ID INT AUTO_INCREMENT PRIMARY KEY, "
-                            "Name VARCHAR(50) NOT NULL, "
+                            "Name VARCHAR(50) PRIMARY KEY, "
                             "MainURL VARCHAR(255) NOT NULL, "
                             "Language CHAR(2) NOT NULL"
                             ")")
@@ -160,3 +159,9 @@ class MySQL(AbsDatabase):
             "bool": "TINYINT"
         }
         return f"{name} {types_dict[dict_arg['format']]}"
+
+    def _generate_disaster_query(self, disaster_instance_arg) -> str:
+        pass
+
+    def _generate_rawnew_query(self, disaster_instance_arg) -> str:
+        pass
