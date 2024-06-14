@@ -72,7 +72,7 @@ class GptParser:
                       "If inexact numerals are present (such as 'hundreds' or 'dozens') " \
                       "interpret them as numeric ('100' and '12' respectively)\n" \
                       "- str: The answer must be a character string\n" \
-                      "- date: The asnwer mus be in ISO 8601 format\n\n" \
+                      "- date: The answer must be in ISO 8601 format\n\n" \
                       "In case the new contains only partial information try to give an approximate answer " \
                       "according to the format\n" \
                       "In case the new does not contain enough information for even an approximate answer, " \
@@ -89,7 +89,7 @@ class GptParser:
                       "In the first of may of this year, a fire in a forest in Norway" \
                       "caused the death of dozens of persons and the displacement of 100 people.\n\n" \
                       "-Question: How many people died?\n" \
-                      "-Format: integer\n" \
+                      "-Format: int\n" \
                       "In this case, your answer should be '12'\n\n" \
                       "Here is another example:\n" \
                       "-News Article: " \
@@ -97,7 +97,7 @@ class GptParser:
                       "This week a horrible earthquake of magnitude 5 hit the city of tokyo, causing estimated " \
                       "damages of over 1 Million dollars\n\n" \
                       "-Question: What are the estimated damages in dollars?\n" \
-                      "-Format: integer\n" \
+                      "-Format: int\n" \
                       "In this case, your answer should be: '1000000'\n\n" \
                       "Here is a third example:\n" \
                       "-News Article: " \
@@ -106,7 +106,7 @@ class GptParser:
                       "unexpected fashion. Over a thousand cases were detected, " \
                       "already 100 lethal victims are confirmed \n\n" \
                       "-Question: How many people were infected?\n" \
-                      "-Format: integer\n" \
+                      "-Format: int\n" \
                       "In this case, your answer should be: '1000'\n\n"
         results = dict()
         for question in questions_arg:
@@ -136,11 +136,13 @@ class GptParser:
         title = new_arg.get("title")
         body = new_arg.get("body")
         if title is None or body is None:
-            raise ValueError("The new is missing either a title or a body key!")
+            raise ValueError("The new is missing either a title or a body")
         return f"*{title}*\n{body}\n\n"
 
     @staticmethod
     def _type_cast_answer(answer: str, result_format: str):
+        if answer == "None":
+            return None
         if result_format == "int":
             return int(answer.rstrip())
         if result_format == "str":

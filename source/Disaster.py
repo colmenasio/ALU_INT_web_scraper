@@ -2,6 +2,7 @@ from source.Categories import Categories
 from source.CustomExceptions import InsufficientInformation, InvalidCategoryErr
 from source.GptParser import GptParser
 from source.database_integration.MySQL import MySQL
+from source.database_integration.JustPrintData import JustPrintData
 
 
 class Disaster:
