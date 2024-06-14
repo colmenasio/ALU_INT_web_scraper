@@ -1,10 +1,10 @@
-from AbsDatabase import AbsDatabase
+from source.database_integration.AbsDatabase import AbsDatabase
 
 
 class JustPrintData(AbsDatabase):
     """Doesn't send anything to the database, just prints the information, useful for debugging"""
     def __init__(self):
-        print("\n-----------------------------------------------"
+        print("\n-----------------------------------------------\n"
               "No database was selected. As a result the data will not be stored, only printed to the command line")
         if input("Continue anyways? (Y/N)").lower() != "y":
             exit()
