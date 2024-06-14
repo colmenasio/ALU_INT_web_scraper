@@ -8,9 +8,9 @@ class MySQL(AbsDatabase):
     DATABASE_NAME = "test_web_scraper"
     # TODO make this a prompt or a config or something idk this is just sad
 
-    CREDENTIALS_FILEPATH = "../../configs/mysql_credentials/credentials.json"
-    CATEGORIES_FILEPATH = "../../configs/categories/categories.json"
-    WEBSITE_DEFINITIONS_FILEPATH = "../../configs/website_definitions/definitions"
+    CREDENTIALS_FILEPATH = "../configs/mysql_credentials/credentials.json"
+    CATEGORIES_FILEPATH = "../configs/categories/categories.json"
+    WEBSITE_DEFINITIONS_FILEPATH = "../configs/website_definitions/definitions"
 
     def __init__(self):
         print("\n-----------------------------------------------\n"
@@ -24,7 +24,18 @@ class MySQL(AbsDatabase):
         self._check_if_db_exists()
 
     def save_to_database(self, disaster_instance_arg) -> None:
-        raise NotImplementedError
+        # TODO add cleanup in case the insertion process is stopped halfway
+        query = None
+        try:
+            query = self._generate_disaster_insertion_query(disaster_instance_arg)
+            self.cursor.execute(query)
+            query = "SELECT LAST_INSERT_ID()"
+            self.cursor.execute(query)
+            last_disaster_id = self.cursor.fetchone()[0]
+            query = self._generate_rawnew_insertion_query(disaster_instance_arg, last_disaster_id)
+        except mysql.connector.ProgrammingError as e:
+            print("An invalid query was sent to the server:")
+            print(f"Query: {query}")
 
     def _do_login(self):
         credentials = self._get_credentials()
@@ -43,6 +54,8 @@ class MySQL(AbsDatabase):
             print(f"Credentials not found in '{self.CREDENTIALS_FILEPATH}'. Create it?")
             if input("(Y/N)").lower() == "y":
                 self._create_credentials()
+            else:
+                exit()
         with open(self.CREDENTIALS_FILEPATH) as fstream:
             credentials = json.load(fstream)
         are_credentials_valid = all([credential in credentials.keys() for credential in ["host", "user", "password"]])
@@ -137,6 +150,7 @@ class MySQL(AbsDatabase):
 
     def _create_disasters_tables(self) -> None:
         """Creates a table from each type of disaster defined in the categories."""
+        # TODO add sanitization and stuff
         with open(self.CATEGORIES_FILEPATH) as fstream:
             categories_data = json.load(fstream)
         disaster_types = list(categories_data.keys())
@@ -157,12 +171,23 @@ class MySQL(AbsDatabase):
         return f"{name} {types_dict[dict_arg['format']]}"
 
     @staticmethod
-    def _generate_disaster_query(disaster_instance_arg) -> str:
+    def _generate_disaster_insertion_query(disaster_instance_arg) -> str:
+        # TODO add sanitization and stuff
         column_names = str(list(disaster_instance_arg.data.keys())).strip("[]")
         values = str(list(disaster_instance_arg.data.values())).strip("[]")
         query = f"INSERT INTO {disaster_instance_arg.category} ({column_names}) VALUES ({values})"
         return query
 
-    def _generate_rawnew_query(self, disaster_instance_arg, disaster_key: int, news_portal_key: str) -> str:
-        pass
+    @staticmethod
+    def _generate_rawnew_insertion_query(disaster_instance_arg, disaster_key: int) -> str:
+        # TODO add sanitization and stuff
+        column_names = "NewsPortal_ID, DisasterType, Disaster_ID, NewURL, NewTitle, NewBody"
+        values = f"{disaster_instance_arg.news_portal}, " \
+                 f"{disaster_instance_arg.category} ," \
+                 f"{disaster_key} ," \
+                 f"{disaster_instance_arg.link} ," \
+                 f"{disaster_instance_arg.raw_data['title']} ," \
+                 f"{disaster_instance_arg.raw_data['body']}"
+        query = f"INSERT INTO RawNews ({column_names}) VALUES ({values})"
+        return query
 
