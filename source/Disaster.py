@@ -16,6 +16,7 @@ class Disaster:
 
     def __init__(self,
                  raw_data_arg: dict = None,
+                 news_portal_arg: str = None,
                  link_arg: str = None,
                  language_arg: str = None,
                  category_arg: str = None,
@@ -28,8 +29,9 @@ class Disaster:
         :param category_arg
         """
         self.raw_data = raw_data_arg
-        self.language = language_arg
+        self.news_portal = news_portal_arg
         self.link = link_arg
+        self.language = language_arg
         # TODO sanitize the category input
         self.category = category_arg
         # TODO sanitize the data input

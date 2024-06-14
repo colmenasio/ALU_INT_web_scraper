@@ -318,7 +318,8 @@ class WebCrawler:
         curr_disaster = self._build_unparsed_disaster(soup, link_arg)
         curr_disaster.classify()
         curr_disaster.extract_data()
-        curr_disaster.save_to_database()  # TODO Rn it just prints the data. Add code in each subclass
+        # TODO modify the way the db connection is handled to add propper context management
+        curr_disaster.save_to_database()
 
     def _gdacs_new_scraping(self, link_to_new_arg: str) -> Disaster:
         """call the api I guess"""
@@ -333,5 +334,6 @@ class WebCrawler:
         parsed_title = re.sub(r'\s+', ' ', title.text)
         parsed_body = re.sub(r'\s+', ' ', "".join([x.text for x in body]))
         return Disaster(raw_data_arg={"title": parsed_title, "body": parsed_body},
+                        news_portal_arg=self._web_name,
                         link_arg=link_arg,
                         language_arg=self._language)
