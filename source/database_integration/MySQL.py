@@ -160,8 +160,13 @@ class MySQL(AbsDatabase):
         }
         return f"{name} {types_dict[dict_arg['format']]}"
 
-    def _generate_disaster_query(self, disaster_instance_arg) -> str:
+    @staticmethod
+    def _generate_disaster_query(disaster_instance_arg) -> str:
+        column_names = str(list(disaster_instance_arg.data.keys())).strip("[]")
+        values = str(list(disaster_instance_arg.data.values())).strip("[]")
+        query = f"INSERT INTO {disaster_instance_arg.category} ({column_names}) VALUES ({values})"
+        return query
+
+    def _generate_rawnew_query(self, disaster_instance_arg, disaster_key: int, news_portal_key: str) -> str:
         pass
 
-    def _generate_rawnew_query(self, disaster_instance_arg) -> str:
-        pass
