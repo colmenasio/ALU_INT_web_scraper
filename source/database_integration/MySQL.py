@@ -25,7 +25,6 @@ class MySQL(AbsDatabase):
         self._check_if_db_exists()
 
     def save_to_database(self, disaster_instance_arg) -> None:
-        # TODO add cleanup in case the insertion process is stopped halfway
         query = None
         try:
             query = self._generate_disaster_insertion_query(disaster_instance_arg)
@@ -105,7 +104,6 @@ class MySQL(AbsDatabase):
         self.cursor.execute(f"USE {self.DATABASE_NAME}")
 
     def _create_database(self) -> None:
-        # TODO make it so that if the creation process excepts, the half-finished database is dropped
         self.cursor.execute(f"CREATE DATABASE {self.DATABASE_NAME}")
         try:
             self.cursor.execute(f"USE {self.DATABASE_NAME}")
