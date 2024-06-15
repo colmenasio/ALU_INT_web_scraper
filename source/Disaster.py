@@ -1,8 +1,6 @@
 from source.Categories import Categories
 from source.CustomExceptions import InsufficientInformation, InvalidCategoryErr
 from source.GptParser import GptParser
-from source.database_integration.MySQL import MySQL
-from source.database_integration.JustPrintData import JustPrintData
 
 
 class Disaster:
@@ -12,8 +10,6 @@ class Disaster:
     fill the remaining ones until the instance is ready to be sent to the database"""
 
     categories = Categories.build_from_json()
-    database = MySQL()
-    # TODO Since eventually the database will change, make the selection of the db used a command prompt or a config idc
 
     def __init__(self,
                  raw_data_arg: dict = None,
