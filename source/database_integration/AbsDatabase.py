@@ -19,3 +19,4 @@ class AbsDatabase(ABC):
     @abstractmethod
     def close_connection(self) -> None:
         pass
+

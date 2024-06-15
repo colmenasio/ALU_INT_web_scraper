@@ -55,12 +55,6 @@ class Disaster:
             )
         self.data = GptParser.answer_questions(self.raw_data, self.categories.get_questions_for(self.category))
 
-    def save_to_database_deprecated(self) -> None:
-        """Requires self->category and self->data to be specified"""
-        if self.category is None or self.data is None:
-            raise InsufficientInformation(Disaster.save_to_database.__name__, "self.category and self.data")
-        self.database.save_to_database(self)
-
     def __str__(self):
         print(f"Object: {self.__repr__()}\n"
               f"Unparsed Data: {self.raw_data}"

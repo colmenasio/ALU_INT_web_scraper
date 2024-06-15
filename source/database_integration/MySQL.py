@@ -6,12 +6,6 @@ import json
 
 class MySQL(AbsDatabase):
     DATABASE_NAME = "test_web_scraper"
-    print("\n-----------------------------------------------\n"
-          "MySQL was selected as the destination of the data.\n"
-          f"The database that will be used is '{DATABASE_NAME}'")
-    # TODO add options to change the database selected
-    if input("Proceed? (Y/N) ").lower() != "y":
-        exit()
     # TODO make this a prompt or a config or something idk this is just sad
 
     CREDENTIALS_FILEPATH = "../configs/mysql_credentials/credentials.json"
@@ -20,7 +14,12 @@ class MySQL(AbsDatabase):
 
     SHOW_EXCEPTIONS = True
 
+    has_done_startup_command_prompt = False
+
     def __init__(self):
+        if not MySQL.has_done_startup_command_prompt:
+            self._do_startup_command_prompt()
+            MySQL.has_done_startup_command_prompt = True
         self.session = self._do_login()
         self.cursor = self.session.cursor()
         self._check_if_db_exists()
@@ -51,6 +50,14 @@ class MySQL(AbsDatabase):
     def close_connection(self) -> None:
         self.cursor.close()
         self.session.close()
+
+    def _do_startup_command_prompt(self) -> None:
+        print("\n-----------------------------------------------\n"
+              "MySQL was selected as the destination of the data.\n"
+              f"The database that will be used is '{self.DATABASE_NAME}'")
+        # TODO add options to change the database selected
+        if input("Proceed? (Y/N) ").lower() != "y":
+            exit()
 
     def _do_login(self):
         credentials = self._get_credentials()
