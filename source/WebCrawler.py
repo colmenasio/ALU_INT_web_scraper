@@ -13,6 +13,10 @@ import warnings
 from source.CustomExceptions import InvalidCategoryErr
 from source.Disaster import Disaster
 
+from source.database_integration.MakeConnectionPool import MakeConnectionPool
+from source.database_integration.AbsDatabase import AbsDatabase
+from source.database_integration.MySQL import MySQL
+
 if __name__ == "__main__":
     print("lololololol wrong file. dont delete this its useful for testing xd")
 
@@ -22,11 +26,15 @@ class WebCrawler:
     Meant to be instanced once per website.
     Wraps the methods for crawling a website and processing news in a convenient way
     Can be initialized with either arguments or a dictionary of arguments"""
+
+    # TODO maybe abstract selenium to a class to reduce clutter....
     sel_options = webdriver.ChromeOptions()
     sel_options.add_argument("--headless")
     sel_driver = webdriver.Chrome(options=sel_options)
     sel_driver.implicitly_wait(time_to_wait=3)
     sel_session_lock = threading.Lock()
+
+    DATABASE_CLASS = MySQL
 
     DEFINITIONS_PATH = "../configs/website_definitions/definitions"
     SHOW_EXCEPTIONS = False
@@ -186,12 +194,15 @@ class WebCrawler:
                    "only print": lambda _, link: print(link)}
         parse_method = methods[extracting_method_arg]
         failed_links = Queue()
-        threads = [threading.Thread(target=lambda: self._consumer_thread(parse_method, failed_links, status_filter_arg))
-                   for _ in range(n_of_threads_arg)]
-        for thread in threads:
-            thread.start()
-        self._link_pipeline.join()
-        self._link_pipeline = failed_links
+        with MakeConnectionPool(self.DATABASE_CLASS, n_of_threads_arg) as db_connections:
+            for thread_id in range(n_of_threads_arg):
+                thread = threading.Thread(target=lambda: self._consumer_thread(parse_method,
+                                                                               failed_links,
+                                                                               status_filter_arg,
+                                                                               db_connections[thread_id]))
+                thread.start()
+            self._link_pipeline.join()
+            self._link_pipeline = failed_links
 
     def _matches_filters(self, link_arg: str) -> bool:
         """Filters a link based on self's whitelists/blacklists. Yeah, that's it.
@@ -273,7 +284,11 @@ class WebCrawler:
             raise ValueError("Invalid next_page_link_selector")
         return self._format_link(next_page_tag["href"], is_next_page_link_arg=True)
 
-    def _consumer_thread(self, parsing_method_arg, failed_links_queue_arg: Queue, status_filter_arg: str) -> None:
+    def _consumer_thread(self,
+                         parsing_method_arg,
+                         failed_links_queue_arg: Queue,
+                         status_filter_arg: str,
+                         db_connection_arg: AbsDatabase) -> None:
         """Consumer thread wrapper. Will consume elements from self->link_pipeline until its empty, then dies.
 
         :param parsing_method_arg: A method with the following signature: method(self, link)->None. This is the method
@@ -283,27 +298,35 @@ class WebCrawler:
             or don't match the status filter will go
         :param status_filter_arg: A string indicating which links of the pipeline will be processed. The rejected links
             will be added to failed_link_queue
+        :param db_connection_arg: An instace of a class inheriting from AbsDatabase.
         """
         while True:
             try:
-                self._thread_main(parsing_method_arg, failed_links_queue_arg, status_filter_arg)
+                self._thread_main(parsing_method_arg, failed_links_queue_arg, status_filter_arg, db_connection_arg)
                 self._link_pipeline.task_done()
             except Empty:
                 return
 
-    def _thread_main(self, parsing_method_arg, failed_links_queue_arg: Queue, status_filter_arg: str) -> None:
+    def _thread_main(self,
+                     parsing_method_arg,
+                     failed_links_queue_arg:
+                     Queue,
+                     status_filter_arg: str,
+                     db_connection_arg: AbsDatabase) -> None:
         """Consumer thread main function. Processes a link and mutates both the
         link_pipeline and the failed_link queue in-place.
 
         :except queue.Empty: When self->link_pipeline is finally empty
         """
-        global e
         curr_link = self._link_pipeline.get(block=False)
+        # Filter by status
         if status_filter_arg is not None and curr_link["status"] != status_filter_arg:
             failed_links_queue_arg.put(curr_link)
             return
         try:
-            parsing_method_arg(self, curr_link["link"])
+            # Do the actual processing of the link
+            curr_disaster = parsing_method_arg(self, curr_link["link"])
+            db_connection_arg.save_to_database(curr_disaster)
             return
         except ConnectionError as e:
             curr_link["status"] = "Connection_Error"
@@ -321,14 +344,13 @@ class WebCrawler:
         print(f"An error occurred when trying to process a link: \n{curr_link['link']}\n Error: {curr_link['status']}")
         return
 
-    def _generic_new_scraping(self, link_arg: str) -> None:
+    def _generic_new_scraping(self, link_arg: str) -> Disaster:
         """Generic extracting method used on news consisting of a title and main body"""
         soup = self._get_soup_from_link(link_arg)
         curr_disaster = self._build_unparsed_disaster(soup, link_arg)
         curr_disaster.classify()
         curr_disaster.extract_data()
-        # TODO modify the way the db connection is handled to add propper context management
-        curr_disaster.save_to_database()
+        return curr_disaster
 
     def _gdacs_new_scraping(self, link_to_new_arg: str) -> Disaster:
         """call the api I guess"""
