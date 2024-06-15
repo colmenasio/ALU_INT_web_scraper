@@ -48,6 +48,9 @@ class MySQL(AbsDatabase):
             if self.SHOW_EXCEPTIONS:
                 print(e)
 
+    def close_connection(self) -> None:
+        self.cursor.close()
+        self.session.close()
 
     def _do_login(self):
         credentials = self._get_credentials()

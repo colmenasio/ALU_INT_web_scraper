@@ -15,3 +15,7 @@ class AbsDatabase(ABC):
     def save_to_database(self, disaster_instance_arg) -> None:
         """Stores the data passed in the disaster_instace """
         pass
+
+    @abstractmethod
+    def close_connection(self) -> None:
+        pass

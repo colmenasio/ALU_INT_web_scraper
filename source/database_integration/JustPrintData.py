@@ -11,3 +11,6 @@ class JustPrintData(AbsDatabase):
 
     def save_to_database(self, disaster_instance_arg) -> None:
         print(disaster_instance_arg)
+
+    def close_connection(self) -> None:
+        pass
