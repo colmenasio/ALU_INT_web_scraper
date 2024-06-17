@@ -16,7 +16,10 @@ class AbsDatabase(ABC):
         """Stores the data passed in the disaster_instace """
         pass
 
+    def __enter__(self):
+        return self
+
     @abstractmethod
-    def close_connection(self) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         pass
 

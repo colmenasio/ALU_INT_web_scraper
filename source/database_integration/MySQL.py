@@ -46,7 +46,7 @@ class MySQL(AbsDatabase):
             if self.SHOW_EXCEPTIONS:
                 print(e)
 
-    def close_connection(self) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.cursor.close()
         self.session.close()
 

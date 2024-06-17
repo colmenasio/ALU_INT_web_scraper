@@ -14,7 +14,7 @@ class JustPrintData(AbsDatabase):
     def save_to_database(self, disaster_instance_arg) -> None:
         print(disaster_instance_arg)
 
-    def close_connection(self) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         pass
 
     @staticmethod
