@@ -7,7 +7,7 @@ Includes implementation of [`MySQL`](https://www.mysql.com/) as a database solut
 
 This proyect was done as a "alumno interno" task (plz change this line asap...)
 
-None of the scripts in this repository was written by chatGPT or similar tools
+***None*** of the scripts in this repository were written by chatGPT or similar tools
 
 ## Getting Started
 1. Creating a `WebCrawler` instance:
