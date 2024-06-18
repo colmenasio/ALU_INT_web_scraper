@@ -59,7 +59,7 @@ This proyect was done as a "alumno interno" task (plz change this line asap...)
         - [x] Better propts
         - [ ] Fine-tuning the model, perhaps?
 - [x] For the love of god please write propper tests (kinda done)
-- [ ] Serialization/Database implementation
+- [x] Serialization/Database implementation
 
 
 <!-- Doctumentation  -->
